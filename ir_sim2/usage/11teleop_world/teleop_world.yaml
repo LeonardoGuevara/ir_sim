@@ -10,8 +10,8 @@ robots:
   number: 10
 
   # for multiple robots number>1
-  distribute: {mode: 'circular', shapes: [0.2], circle: [5, 5, 4], random_bear: False, random_shape: False, radius_low: 0.1, radius_high: 1} 
-  # distribute: {mode: 'random', rlow: [0, 0, 0], rhigh: [10, 10, 3.14], distance: 1, random_shape: True, radius_low: 0.1, radius_high: 1}
+  # distribute: {mode: 'circular', shapes: [0.2], circle: [5, 5, 4], random_bear: False, random_shape: False, radius_low: 0.1, radius_high: 1} 
+  distribute: {mode: 'random', rlow: [0, 0, 0], rhigh: [10, 10, 3.14], distance: 1, random_shape: True, radius_low: 0.1, radius_high: 0.5}
   # distribute: {mode: 'manual', states: [[1, 1, 0], [2, 1, 0]], shapes: [0.2, 0.2], goals: [[7, 7, 0], [7, 2, 0]], random_bear: False}
 
 obstacles:
@@ -21,12 +21,12 @@ obstacles:
     distribute: {mode: 'random', shapes: [0.2], rlow: [0, 0], rhigh: [10, 10], distance: 1, random_shape: False, shapes_low: 0.1, shapes_high: 1} 
     # distribute: {mode: 'manual', states: [[1, 1], [2, 1]], shapes: [0.5, 0.2]}  # shapes: radiuses 
 
-    # dynamic: {sport: 'wander', sport_range: [0, 0, 10, 10], vel: 0.5}
-    dynamic: {sport: 'default', goals: [[4, 1], [9, 9]], vel: 0.3}
+    dynamic: {sport: 'wander', sport_range: [0, 0, 10, 10], vel: 0.5}
+    # dynamic: {sport: 'default', goals: [[4, 1], [9, 9]], vel: 0.3}
     # dynamic: {sport: 'partol', goals: [[4, 1], [9, 9]], vel: [1, 1]}  waiting
     
   - type: 'obstacle_polygon'
-    number: 1
+    number: 0
     distribute: {mode: 'manual', states: [[3, 3, 0], [5, 3, 0]], shapes: [ [[1, 2], [3, 1.5], [4, 3], [2, 4]] ]} 
 
   - type: 'obstacle_block'
