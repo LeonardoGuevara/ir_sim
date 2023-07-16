@@ -7,7 +7,7 @@ class object_base:
 
     id_iter = itertools.count()
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], dynamics: str='omni', role: str='obstacle', static=False) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False) -> None:
 
         '''
         parameters:
@@ -39,6 +39,7 @@ class object_base:
 
         self._dynamics = dynamics
 
+        self.color = color
         self.role = role
         self.static = static
 
