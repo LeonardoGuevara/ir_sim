@@ -1,33 +1,63 @@
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+import logging
 
 class EnvPlot:
 
-    def __init__(self, subplot=False, **kwargs) -> None:
+    def __init__(self, grid_map=None, objects=[], x_range=[0, 10], y_range=[0, 10], subplot=False,  **kwargs) -> None:
 
         if not subplot:
             self.fig, self.ax = plt.subplots()
 
-        else:
-            self.fig, self.ax, self.sub_ax_list = self.world.sub_world_plot()
+        # else:
+        #     self.fig, self.ax, self.sub_ax_list = self.sub_world_plot()
+
+        self.x_range = x_range
+        self.y_range = y_range
 
 
+        self.init_plot(grid_map, objects, **kwargs)
+        self.corlor_map = {'robot': 'g', 'obstacle': 'k', 'landmark': 'b', 'target': 'pink'}
+        
 
-        self.init_plot(**kwargs)
-    
+        # 
+        self.corlor_map.update(kwargs.get('corlor_map', dict()))
 
-    def init_plot(self, no_axis=False, **kwargs):
+
+    def init_plot(self, grid_map, objects, no_axis=False):
         
         self.ax.set_aspect('equal') 
-        self.ax.set_xlim(self.world.x_range) 
-        self.ax.set_ylim(self.world.y_range)
+        self.ax.set_xlim(self.x_range) 
+        self.ax.set_ylim(self.y_range)
         
         self.ax.set_xlabel("x [m]")
         self.ax.set_ylabel("y [m]")
 
-        self.draw_components(self.ax, mode='static', **kwargs)
+        self.draw_components('static', objects)
+        self.draw_grid_map(grid_map)
 
         if no_axis: plt.axis('off')
+
+
+    def draw_components(self, mode='all', objects=[], **kwargs):
+        # mode: static, dynamic, all
+        if mode == 'static':
+            [obj.plot(self.ax) for obj in objects if obj.static]
+                
+        elif mode == 'dynamic':
+            [obj.plot(self.ax) for obj in objects if not obj.static]
+
+        elif mode == 'all':
+            [obj.plot(self.ax) for obj in objects]
+        else:
+            logging.error('error input of the draw mode')
+
+
+    def draw_grid_map(self, grid_map=None, **kwargs):
+        
+        if grid_map is not None:
+            self.ax.imshow(grid_map.T, cmap='Greys', origin='lower', extent = self.x_range + self.y_range) 
+
 
 
     def sub_world_plot(self):
