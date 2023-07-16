@@ -1,5 +1,6 @@
 import os
 import sys
+from math import pi
 
 def file_check(file_name):
 
@@ -18,3 +19,14 @@ def file_check(file_name):
         raise FileNotFoundError("File not found: " + file_name)
 
     return abs_file_name
+
+
+def WrapToPi(rad):
+    # transform the rad to the range [-pi, pi]
+    while rad > pi:
+        rad = rad - 2 * pi
+    
+    while rad < -pi:
+        rad = rad + 2 * pi
+    
+    return rad
