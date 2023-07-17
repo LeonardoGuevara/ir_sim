@@ -1,3 +1,7 @@
+<div align="center">
+<img src="doc/image/IR_SIM_logos/IR_SIM-logos_transparent_clip.png" width = "400" >
+</div>
+
 # Intelligent Robot Simulator (ir-sim)
 
 A python based robot simulator framework for the intelligent robotics navigation and learning.
@@ -17,8 +21,6 @@ Features:
   * Easy to reproduce the robotics algorithms and extend for your own project. 
 
 ## Prerequisite
-
-Test platform: Ubuntu20.04, windows10
 
 - Python: >= 3.7
     - numpy  
