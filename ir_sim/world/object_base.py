@@ -1,9 +1,10 @@
 import numpy as np
-from shapely import MultiPolygon, Point, Polygon, LineString
+from shapely import MultiPolygon, Point, Polygon, LineString, minimum_bounding_radius
 import itertools
 from typing import Optional
+from ir_sim.lib.factory import dynamics_factory
 
-class object_base:
+class ObjectBase:
 
     id_iter = itertools.count()
 
@@ -16,8 +17,8 @@ class object_base:
 
             shape_tuple: tuple to init the geometry, default is None; A sequence of (x, y) numeric coordinate pairs or triples, or an array-like with shape (N, 2)
                 for circle, the list should have be: (center, radius)
-                for polygon, the list should have the element: [vertices], number of vertices >= 3
-                for lineString, the list should have the element: [vertices]
+                for polygon, the list should have the element of vertices: [vertices], number of vertices >= 3
+                for lineString, composed of one or more line segments, the list should have the element of vertices: [vertices]. 
 
             state: the state of the object, list or numpy. default is [0, 0, 0], [x, y, theta]
 
@@ -30,30 +31,41 @@ class object_base:
             role: the role of the object, including: robot, obstacle, landmark, target, default is 'obstacle'
         '''
 
-        self._id = next(object_base.id_iter)
+        self._id = next(ObjectBase.id_iter)
         self._shape = shape
         self._geometry = self.construct_geometry(shape, shape_tuple)
 
         self._state = state
         self._velocity = velocity
 
-        self._dynamics = dynamics
+        self._dynamics = dynamics_factory(dynamics)
 
         self.color = color
         self.role = role
         self.static = static
 
+        # flag
+        self.stop_flag = False
+        self.arrive_flag = False
+        self.collision_flag = False
 
-    
-    def step(self, velocity):
+
+    def step(self, velocity, **kwargs):
 
         if self.static:
-            return  
+            return None  
 
-        else:  
-            pass
+        else: 
+            
+            self.pre_process(velocity)
+
+            new_state = self._dynamics(self._state, velocity, **kwargs)
+
+
+
+            
+
     
-
     def construct_geometry(self, shape, shape_tuple):
 
         if shape == 'circle':
@@ -71,19 +83,21 @@ class object_base:
         return geometry
 
 
-    def state_transition(self):
+    def geometry_state_transition(self):
+        pass
+    
 
-        
-        
-        
+    # get information
+
+    def get_inequality_Ab(self):
+        # general inequality Ax <= b 
         pass
 
 
-        
+    
 
 
-
-
+    # property
     @property
     def shape(self):
         return self._shape
@@ -100,11 +114,21 @@ class object_base:
     def id(self):
         return self._id
     
-
-
     @property
     def state(self):
         return self._state
+
+    @property
+    def radius(self):
+
+        '''
+        return the minimum bounding radius
+        '''
+    
+        return minimum_bounding_radius(self._geometry)
+
+
+
 
 
 
