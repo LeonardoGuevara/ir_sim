@@ -1,0 +1,1 @@
+from ir_sim.world.object_base import ObjectBase
