@@ -37,7 +37,7 @@ class EnvBase:
         # init world, robot, obstacles
         self.world = world(**world_kwargs)
         self.robots = MultiRobots()
-        self.obstacles = MultiRobots()
+        # self.obstacles = MultiObstacles()
         # self.objects = self.robots.objects + self.obstacles.objects
         
         self.env_plot = EnvPlot(grid_map=self.world.grid_map, objects=self.objects, **plot_kwargs)
