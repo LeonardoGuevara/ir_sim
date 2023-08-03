@@ -15,11 +15,9 @@ class EnvPlot:
         self.x_range = x_range
         self.y_range = y_range
 
-
         self.init_plot(grid_map, objects, **kwargs)
         self.corlor_map = {'robot': 'g', 'obstacle': 'k', 'landmark': 'b', 'target': 'pink'}
         
-
         # 
         self.corlor_map.update(kwargs.get('corlor_map', dict()))
 
