@@ -1,8 +1,8 @@
 import yaml
 
 from ir_sim.util.util import file_check
-from ir_sim.world import world, MultiRobots
-from env_plot import EnvPlot
+from ir_sim.world import world, MultiRobots, MultiObstacles
+from .env_plot import EnvPlot
 
 
 class EnvBase:
@@ -33,20 +33,21 @@ class EnvBase:
         world_kwargs |= kwargs.get('world', dict())
         plot_kwargs |= kwargs.get('plot', dict())
         
-
         # init world, robot, obstacles
         self.world = world(**world_kwargs)
+
         self.robots = MultiRobots()
-        # self.obstacles = MultiObstacles()
-        # self.objects = self.robots.objects + self.obstacles.objects
+        self.obstacles = MultiObstacles()
+
+        self.objects = self.robots + self.obstacles
         
         self.env_plot = EnvPlot(grid_map=self.world.grid_map, objects=self.objects, **plot_kwargs)
 
-
-
+        # set world para and env param
+        
 
     def show(self):
-        pass
+        self.env_plot.show()
 
 
 
