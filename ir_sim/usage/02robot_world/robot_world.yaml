@@ -5,13 +5,14 @@ world:
   sample_time: 0.1  # 10 Hz for render and data extraction 
   offset: [0, 0] # the offset of the world on x and y 
 
-robots:
+robot:
   type: 'robot_diff'  # # robot_omni, robot_diff, robot_acker
   number: 1
   state: [1, 1, 0]  
   radius: 0.2 # # for diff (default)
   goal: [9, 9, 0] 
   acce: [3, .inf]   # steer, angular or v_x, v_y 
+  behavior: 'dash' # 
 
 
 
