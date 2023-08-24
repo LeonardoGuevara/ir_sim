@@ -30,3 +30,23 @@ def WrapToPi(rad):
         rad = rad + 2 * pi
     
     return rad
+
+def WrapToRegion(rad, range):
+    # transform the rad to defined range, 
+    # the length of range should be 2 * pi
+    assert(len(range) >= 2 and range[1] - range[0] == 2*pi)
+
+    while rad > range[1]:
+        rad = rad - 2 * pi
+    
+    while rad < range[0]:
+        rad = rad + 2 * pi
+    
+    return rad
+
+def extend_list(input_list, number):
+
+    if len(input_list) < number: 
+        input_list.extend([input_list[-1]]* (number - len(input_list)) )
+
+    return input_list
