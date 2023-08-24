@@ -7,6 +7,7 @@ from math import inf, pi
 from dataclasses import dataclass
 from ir_sim.global_param import world_param 
 import logging
+from ir_sim.util.util import WrapToRegion
 
 @dataclass
 class ObjectInfo:
@@ -27,7 +28,7 @@ class ObjectBase:
 
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[], vel_max=[], acce=[-inf, inf], angle_range=[-pi, pi]) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-inf, inf], vel_max=[-inf, inf], acce=[-inf, inf], angle_range=[-pi, pi]) -> None:
 
         '''
         parameters:
@@ -68,7 +69,7 @@ class ObjectBase:
         self.collision_flag = False
 
         # information
-        self.info = ObjectInfo(self._id, shape, role, color, static, np.c_[vel_min], np.c_[vel_max], np.c_[acce], angle_range)
+        self.info = ObjectInfo(self._id, shape, role, color, static, np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range])
 
         # arrive judgement
         self.goal_threshold = 0.1
@@ -81,8 +82,11 @@ class ObjectBase:
 
     def __repr__(self) -> str:
         pass
-        
-        
+
+    def __eq__(self, o: object) -> bool:
+        return self._id == o._id
+
+
     def step(self, velocity, **kwargs):
 
         if self.static:
@@ -90,7 +94,7 @@ class ObjectBase:
 
         else: 
             
-            self.vel_check(velocity)
+            velocity = self.vel_check(velocity)
 
             self.pre_process()
 
@@ -101,6 +105,7 @@ class ObjectBase:
             next_state = self.mid_process(new_state)
 
             self._state = next_state
+            self._velocity = velocity
 
             self.sensor_step()
 
@@ -126,9 +131,9 @@ class ObjectBase:
         elif (velocity > max_vel).any():
             logging.warning("velocity is larger than max_vel, velocity is clipped to max_vel")
 
-        velocity = np.clip(velocity, min_vel, max_vel)
+        velocity_clip = np.clip(velocity, min_vel, max_vel)
 
-        return velocity
+        return velocity_clip
 
     def pre_process(self):
         # collision check
@@ -139,7 +144,7 @@ class ObjectBase:
         pass
     
     def mid_process(self, state):
-        pass
+        state[2, 0] = WrapToRegion(state[2, 0], self.info.angle_range)
 
 
     def construct_geometry(self, shape, shape_tuple):
@@ -181,6 +186,14 @@ class ObjectBase:
     
         return A, b
 
+
+    def set_state(self, state):
+
+        if isinstance(state, list): state = np.c_[state]
+
+        state[2, 0] = WrapToRegion(state[2, 0], self.info.angle_range)
+
+        self._state = state
     
     # property
     @property
