@@ -3,7 +3,10 @@ import yaml
 from ir_sim.util.util import file_check
 from ir_sim.world import world, MultiRobots, MultiObstacles
 from .env_plot import EnvPlot
-
+import threading
+from ir_sim.global_param import world_param
+import time
+import sys
 
 class EnvBase:
 
@@ -15,7 +18,6 @@ class EnvBase:
     
     
     '''
-
 
     def __init__(self, world_name=None, **kwargs):
 
@@ -52,10 +54,26 @@ class EnvBase:
 
         # set env param
 
+        # thread
+        self.step_thread = threading.Thread(target=self.step)
+    
+    def start(self, duration=500, **kwargs):
 
+        self.step_thread.start()
+
+        while world_param.count < duration:
+            print(world_param.count)
+            self.render(world_param.step_time)
+        
+                    
     def step(self):
-        pass
+        
+        while True:
+            time.sleep(0.1)
+            self.world.step()
 
+    def render(self, interval=0.05):
+        pass
 
 
 
@@ -65,6 +83,7 @@ class EnvBase:
 
 
     def end(self):
+        print('end')
         pass
 
     
