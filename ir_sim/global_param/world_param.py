@@ -5,7 +5,7 @@ collision_mode = 'stop' #  None: No collision check
                     # react: robot will have reaction when collision with others
 
 step_time = 0.1
-
+count = 0
 
 
 
