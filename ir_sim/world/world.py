@@ -45,6 +45,7 @@ class world:
         self.sampling = (self.count % (self.sample_time / self.step_time) == 0)
 
         world_param.time = self.time
+        world_param.count = self.count
 
 
     def gen_grid_map(self, obstacle_map):
