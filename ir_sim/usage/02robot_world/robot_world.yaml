@@ -12,7 +12,7 @@ robot:
   radius: 0.2 # # for diff (default)
   goal: [9, 9, 0] 
   acce: [3, .inf]   # steer, angular or v_x, v_y 
-  behavior: 'dash' # 
+  behavior: 'dash' # move toward to the goal directly
 
 
 

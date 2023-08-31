@@ -54,37 +54,37 @@ class EnvBase:
 
         # set env param
 
-        # thread
-        self.step_thread = threading.Thread(target=self.step)
+
+        # # thread
+        # self.step_thread = threading.Thread(target=self.step)
     
-    def start(self, duration=500, **kwargs):
+    # def start(self, duration=500, **kwargs):
 
-        self.step_thread.start()
+    #     self.step_thread.start()
 
-        while world_param.count < duration:
-            print(world_param.count)
-            self.render(world_param.step_time)
+    #     while world_param.count < duration:
+    #         print(world_param.count)
+    #         self.render(world_param.step_time)
+
+
+    def start(self, duration=500):
+        pass
         
-                    
-    def step(self):
-        
-        while True:
-            time.sleep(0.1)
-            self.world.step()
+    def step(self, action=None, **kwargs):
+
+        self.objects_step()
+        self.world.step()
 
     def render(self, interval=0.05):
         pass
 
 
-
     def show(self):
         self.env_plot.show()
 
-
-
     def end(self):
         print('end')
-        pass
+        
 
     
 

@@ -5,16 +5,24 @@ class MultiObjects:
     def __init__(self, object_class, number, **kwargs) -> None:
         
         self.number = number
-        self.object_list = [object_class(**kwargs) for i in range(number)]
+        self.object_list = [object_class(**kwargs) for _ in range(number)]
 
         self.set_attributes(**kwargs)
-
 
     def __add__(self, other):
         return self.object_list + other.object_list
 
     def __len__(self):
         return len(self.object_list)
+
+    def __getitem__(self, index):
+        return self.object_list[index]
+
+    def step(self, velocity_list=[]):
+
+        for obj, vel in  zip(self.object_list, velocity_list):
+            obj.step(vel)
+
 
     def set_attributes(self, **kwargs):
         
@@ -24,8 +32,6 @@ class MultiObjects:
         self.set_states(**states_kwargs)
         self.set_shapes(**shapes_kwargs)
 
-
-    
     def set_states(self, mode='manual', random_bear=False, **kwargs):
         
         if mode == 'manual':

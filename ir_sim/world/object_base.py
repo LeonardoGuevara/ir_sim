@@ -28,7 +28,7 @@ class ObjectBase:
 
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-inf, inf], vel_max=[-inf, inf], acce=[-inf, inf], angle_range=[-pi, pi]) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[0, 0, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-inf, inf], vel_max=[-inf, inf], acce=[-inf, inf], angle_range=[-pi, pi], behavior=None) -> None:
 
         '''
         parameters:
@@ -52,6 +52,12 @@ class ObjectBase:
                 stop_flag: whether the object is stopped, default False
                 arrive_flag: whether the object is arrived, default False
                 collision_flag: whether the object is collided, default False
+
+            behavior: the behavior of the object, 
+                dash: the object will dash to the target position, and stop when arrive the target position
+                wander: the object will wander in the world (random select goal to move)
+                default is dash
+
         '''
 
         self._id = next(ObjectBase.id_iter)
@@ -60,6 +66,7 @@ class ObjectBase:
 
         self._state = state
         self._velocity = velocity
+        self._goal = goal
 
         self._dynamics = dynamics_factory(dynamics)
 
@@ -74,6 +81,11 @@ class ObjectBase:
         # arrive judgement
         self.goal_threshold = 0.1
 
+        # sensor
+        self.sensor = None
+
+        # behavior
+        self.behavior = behavior
 
         # plot 
         self.plot_patch_list = []
@@ -89,31 +101,76 @@ class ObjectBase:
 
     def step(self, velocity, **kwargs):
 
-        if self.static:
-            return None  
+        if self.static or self.stop_flag:
+
+            self._velocity = np.zeros_like(velocity)
+
+            return self._state  
 
         else: 
             
-            velocity = self.vel_check(velocity)
-
             self.pre_process()
 
-            if self.stop_flag: velocity = np.zeros_like(velocity)
+            behavior_vel = self.vel_with_behavior(velocity)
 
-            new_state = self._dynamics(self._state, velocity, **kwargs)
-
+            new_state = self._dynamics(self._state, behavior_vel, **kwargs)
             next_state = self.mid_process(new_state)
 
             self._state = next_state
-            self._velocity = velocity
+            self._velocity = behavior_vel
+
 
             self.sensor_step()
-
             self.post_process()
-
             self.check_arrive()
-            
-        return next_state
+                
+            return next_state
+
+    def vel_with_behavior(self, velocity, custom_behavior=None):
+
+        if isinstance(vel, list): vel = np.c_[vel]
+        if velocity.ndim == 1: vel = vel[:, np.newaxis]
+
+        assert velocity.shape == self.vel_dim
+ 
+        min_vel = np.maximum(self.vel_min, self._velocity - self.acce * world_param.step_time)
+        max_vel = np.minimum(self.vel_max, self._velocity + self.acce * world_param.step_time)
+
+        input_kwargs = {'state': self._state, 'goal': self._goal, 'min_vel': min_vel, 'max_vel': max_vel}
+
+        if self.behavior is None:
+            behavior_vel = velocity
+
+        elif self.behavior == 'dash':
+            behavior_vel = self.dash(velocity,   min_vel, max_vel)
+
+        elif self.behavior == 'wander':
+            behavior_vel = self.wander(velocity, min_vel, max_vel)
+        
+        elif self.behavior == 'custom':
+            behavior_vel = custom_behavior(velocity, min_vel, max_vel)
+
+        else:
+            print("behavior is not defined, use the input velocity")
+            behavior_vel = velocity
+
+        if (behavior_vel < min_vel).any():
+            logging.warning("velocity is smaller than min_vel, velocity is clipped to min_vel")
+        elif (behavior_vel > max_vel).any():
+            logging.warning("velocity is larger than max_vel, velocity is clipped to max_vel")
+
+        behavior_vel_clip = np.clip(behavior_vel, min_vel, max_vel)
+
+
+        return behavior_vel_clip
+
+
+    def custor_behavior(self, velocity, min_vel, max_vel):
+        pass
+
+
+
+
 
 
     def vel_check(self, velocity):
@@ -145,6 +202,8 @@ class ObjectBase:
     
     def mid_process(self, state):
         state[2, 0] = WrapToRegion(state[2, 0], self.info.angle_range)
+
+        return state
 
 
     def construct_geometry(self, shape, shape_tuple):

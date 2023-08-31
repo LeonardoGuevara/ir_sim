@@ -1,12 +1,19 @@
+from math import inf
+import numpy as np
 
+   
+def generate_velocity(self, state, goal, velocity, behavior='dash'):
 
-class Behavior:
+    if behavior == 'dash':
 
-    '''
-    Behavior class is used to define the behavior of the movable objects.
+        behavior_vel = None
 
-    '''
-
-    def __init__(self) -> None:
+    elif behavior == 'wander':
         pass
+
+
+
+    return behavior_vel
+
+    
         
