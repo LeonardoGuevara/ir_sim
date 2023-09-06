@@ -13,9 +13,11 @@ from ir_sim.util.util import WrapToRegion
 class ObjectInfo:
     id: int
     shape: str
+    dynamics: str
     role: str
     color: str
     static: bool
+    goal: np.ndarray
     vel_min: np.ndarray
     vel_max: np.ndarray
     acce: np.ndarray
@@ -28,7 +30,7 @@ class ObjectBase:
 
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[0, 0, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-inf, inf], vel_max=[-inf, inf], acce=[-inf, inf], angle_range=[-pi, pi], behavior=None) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[0, 0, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-inf, inf], vel_max=[-inf, inf], acce=[-inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1) -> None:
 
         '''
         parameters:
@@ -64,10 +66,11 @@ class ObjectBase:
         self._shape = shape
         self._geometry = self.construct_geometry(shape, shape_tuple)
 
-        self._state = state
-        self._velocity = velocity
-        self._goal = goal
+        self._state = np.c_[state]
+        self._velocity = np.c_[velocity]
+        self._goal = np.c_[goal]
 
+        self.dynamics = dynamics
         self._dynamics = dynamics_factory(dynamics)
 
         # flag
@@ -76,10 +79,10 @@ class ObjectBase:
         self.collision_flag = False
 
         # information
-        self.info = ObjectInfo(self._id, shape, role, color, static, np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range])
+        self.info = ObjectInfo(self._id, shape, dynamics, role, color, static, np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range], self._goal)
 
         # arrive judgement
-        self.goal_threshold = 0.1
+        self.goal_threshold = goal_threshold
 
         # sensor
         self.sensor = None
@@ -133,16 +136,13 @@ class ObjectBase:
 
         assert velocity.shape == self.vel_dim
  
-        min_vel = np.maximum(self.vel_min, self._velocity - self.acce * world_param.step_time)
-        max_vel = np.minimum(self.vel_max, self._velocity + self.acce * world_param.step_time)
-
         input_kwargs = {'state': self._state, 'goal': self._goal, 'min_vel': min_vel, 'max_vel': max_vel}
 
         if self.behavior is None:
             behavior_vel = velocity
 
         elif self.behavior == 'dash':
-            behavior_vel = self.dash(velocity,   min_vel, max_vel)
+            behavior_vel = self.dash(velocity, min_vel, max_vel)
 
         elif self.behavior == 'wander':
             behavior_vel = self.wander(velocity, min_vel, max_vel)
@@ -254,6 +254,11 @@ class ObjectBase:
 
         self._state = state
     
+
+    # get information
+    def get_info(self):
+        return self.info
+
     # property
     @property
     def name(self):

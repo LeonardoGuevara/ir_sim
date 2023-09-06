@@ -23,7 +23,7 @@ class EnvBase:
 
         world_file_path = file_check(world_name)
         
-        world_kwargs, plot_kwargs, robots_kwargs, obstacles_kwargs, robot_kwargs  = dict(), dict(), dict(), dict(), dict()
+        world_kwargs, plot_kwargs, robot_kwargs_list, robots_kwargs_list, obstacle_kwargs_list, obstacles_kwargs  = dict(), dict(), [], [], [], []
 
         if world_file_path != None:
            
@@ -31,25 +31,35 @@ class EnvBase:
                 com_list = yaml.load(file, Loader=yaml.FullLoader)
                 world_kwargs = com_list.get('world', dict())
                 plot_kwargs = com_list.get('plot', dict())
-                robots_kwargs = com_list.get('robots', dict())
-                obstacles_kwargs = com_list.get('obstacles', dict())
-                robot_kwargs = com_list.get('robot', dict())
+                robot_kwargs_list = com_list.get('robot', list())
+                robots_kwargs_list = com_list.get('robots', list())
+                obstacle_kwargs_list = com_list.get('obstacle', list())
+                obstacles_kwargs_list = com_list.get('obstacles', list())
 
-        world_kwargs |= kwargs.get('world', dict())
-        plot_kwargs |= kwargs.get('plot', dict())
-        robots_kwargs |= kwargs.get('robots', dict())
-        obstacles_kwargs |= kwargs.get('obstacles', dict())
-        robot_kwargs |= kwargs.get('robot', dict())
-        
+        # for python 3.10
+        # world_kwargs |= kwargs.get('world', dict())
+        # plot_kwargs |= kwargs.get('plot', dict())
+        # robots_kwargs |= kwargs.get('robots', dict())
+        # obstacles_kwargs |= kwargs.get('obstacles', dict())
+        # robot_kwargs |= kwargs.get('robot', dict())
+
+        world_kwargs.update(kwargs.get('world', dict()))
+        plot_kwargs.update(kwargs.get('plot', dict()))
+
+        [robot_kw.update(kw) for (robot_kw, kw) in zip( robot_kwargs_list, kwargs.get('robot', list()) )]
+        [robots_kw.update(kw) for (robots_kw, kw) in zip( robots_kwargs_list, kwargs.get('robots', list()) )]
+        [obstacle_kw.update(kw) for (obstacle_kw, kw) in zip( obstacle_kwargs_list, kwargs.get('obstacle', list()) )]
+        [obstacles_kw.update(kw) for (obstacles_kw, kw) in zip( obstacles_kwargs_list, kwargs.get('obstacles', list()) )]
+
         # init world, robot, obstacles
         self.world = world(**world_kwargs)
 
-        self.robots = MultiRobots(**robots_kwargs)
-        self.obstacles = MultiObstacles(**obstacles_kwargs)
-        # self.robot = 
-
-        self.objects = self.robots + self.obstacles
+        self.robot_list = [ Robot(**robot_kw) for robot_kw in robot_kwargs_list]
+        self.robots_list = [ MultiRobots(**robots_kwargs) for robots_kwargs in robots_kwargs_list ]
+        self.obstacle_list = [ Obstacle(**obstacle_kw) for obstacle_kw in obstacle_kwargs_list]
+        self.obstacles_list = [ MultiRobots(**obstacles_kw) for obstacles_kw in obstacles_kwargs_list ]
         
+        self.objects = self.robot_list + self.robots_list + self.obstacle_list + self.obstacles_list     
         self.env_plot = EnvPlot(self.world.grid_map, self.objects, self.world.x_range, self.world.y_range, **plot_kwargs)
 
         # set env param

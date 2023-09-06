@@ -17,7 +17,8 @@ class MultiObjects:
 
     def __getitem__(self, index):
         return self.object_list[index]
-
+    
+    
     def step(self, velocity_list=[]):
 
         for obj, vel in  zip(self.object_list, velocity_list):
