@@ -44,7 +44,7 @@ class ObjectBase:
 
             state: the state of the object, list or numpy. default is [0, 0, 0], [x, y, theta]
             velocity: the velocity of the object, list or numpy. default is [0, 0], [vx, vy]
-            dynamics: the moving dynamics of the object, including omni, differential, ackermann, custom; default omni, if custom, 
+            dynamics: the moving dynamics of the object, including omni, diff, acker, custom; default omni, if custom, 
 
             static: whether static object; default False
 

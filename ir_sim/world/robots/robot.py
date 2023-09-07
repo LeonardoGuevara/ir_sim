@@ -3,7 +3,9 @@ from robot_diff_circle import RobotDiffCirle
 from ir_sim.world import ObjectBase
 
 
-class Robot:
+class RobotFactory:
     def __init__(self, type, **kwargs) -> None:
-        pass
+        
+        
+        
         

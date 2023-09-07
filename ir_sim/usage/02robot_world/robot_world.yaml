@@ -6,14 +6,15 @@ world:
   offset: [0, 0] # the offset of the world on x and y 
 
 robot:
-  - type: 'robot_diff'  # # robot_omni, robot_diff, robot_acker
+  - type: 'diff'  # omni, diff, acker
+    shape: 'circle'  
+    radius: 0.2 # radius
     state: [1, 1, 0]  
-    radius: 0.2 # # for diff (default)
     goal: [9, 9, 0] 
     acce: [3, .inf]   # steer, angular or v_x, v_y 
     behavior:
       name: 'dash' # move toward to the goal directly 
-      
+    
   
     
     

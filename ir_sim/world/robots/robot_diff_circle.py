@@ -6,6 +6,13 @@ class RobotDiffCirle(ObjectBase):
         super(RobotDiffCirle, self).__init__(shape='circle', shape_tuple=(0, 0, 0.2), dynamics='differential', role='robot', **kwargs)
 
         
+        
+    def plot(self):
+        pass
+
+
+
+        
 
 
 
