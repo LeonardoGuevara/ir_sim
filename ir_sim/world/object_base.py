@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from ir_sim.global_param import world_param 
 import logging
 from ir_sim.util.util import WrapToRegion
+from ir_sim.lib.behavior import Behavior
 
 @dataclass
 class ObjectInfo:
@@ -30,7 +31,7 @@ class ObjectBase:
 
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[0, 0, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-inf, inf], vel_max=[-inf, inf], acce=[-inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-inf, inf], vel_max=[-inf, inf], acce=[-inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1) -> None:
 
         '''
         parameters:
@@ -71,7 +72,7 @@ class ObjectBase:
         self._goal = np.c_[goal]
 
         self.dynamics = dynamics
-        self._dynamics = dynamics_factory(dynamics)
+        self._dynamics = dynamics_factory[dynamics]
 
         # flag
         self.stop_flag = False
@@ -79,6 +80,9 @@ class ObjectBase:
         self.collision_flag = False
 
         # information
+        self.static = static
+        self.vel_min = np.c_[vel_min]
+        self.vel_max = np.c_[vel_max]
         self.info = ObjectInfo(self._id, shape, dynamics, role, color, static, np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range], self._goal)
 
         # arrive judgement
@@ -88,7 +92,7 @@ class ObjectBase:
         self.sensor = None
 
         # behavior
-        self.behavior = behavior
+        self.behavior = Behavior(self.info, behavior)
 
         # plot 
         self.plot_patch_list = []
@@ -102,7 +106,7 @@ class ObjectBase:
         return self._id == o._id
 
 
-    def step(self, velocity, **kwargs):
+    def step(self, velocity=None, **kwargs):
 
         if self.static or self.stop_flag:
 
@@ -131,28 +135,25 @@ class ObjectBase:
 
     def vel_with_behavior(self, velocity, custom_behavior=None):
 
-        if isinstance(vel, list): vel = np.c_[vel]
-        if velocity.ndim == 1: vel = vel[:, np.newaxis]
-
-        assert velocity.shape == self.vel_dim
- 
-        input_kwargs = {'state': self._state, 'goal': self._goal, 'min_vel': min_vel, 'max_vel': max_vel}
-
-        if self.behavior is None:
-            behavior_vel = velocity
-
-        elif self.behavior == 'dash':
-            behavior_vel = self.dash(velocity, min_vel, max_vel)
-
-        elif self.behavior == 'wander':
-            behavior_vel = self.wander(velocity, min_vel, max_vel)
+        min_vel, max_vel = self.get_vel_range()
         
-        elif self.behavior == 'custom':
-            behavior_vel = custom_behavior(velocity, min_vel, max_vel)
+        if velocity is None:
+            
+            if self.behavior is None:
+                print("Error: behavior and input velocity is not defined")
 
+            else:
+                behavior_vel = self.behavior.gen_vel()
+            
         else:
-            print("behavior is not defined, use the input velocity")
+            if isinstance(vel, list): vel = np.c_[vel]
+            if velocity.ndim == 1: vel = vel[:, np.newaxis]
+
+            assert velocity.shape == self.vel_dim
+
             behavior_vel = velocity
+
+        # input_kwargs = {'state': self._state, 'goal': self._goal, 'min_vel': min_vel, 'max_vel': max_vel}
 
         if (behavior_vel < min_vel).any():
             logging.warning("velocity is smaller than min_vel, velocity is clipped to min_vel")
@@ -165,12 +166,10 @@ class ObjectBase:
         return behavior_vel_clip
 
 
+
+
     def custor_behavior(self, velocity, min_vel, max_vel):
         pass
-
-
-
-
 
 
     def vel_check(self, velocity):
@@ -226,6 +225,18 @@ class ObjectBase:
     def geometry_state_transition(self):
         pass
     
+    
+    def plot(self, ax, robot_color = 'g', goal_color='r', show_goal=True, show_text=False, show_traj=False, traj_type='-g', fontsize=10, **kwargs):
+        pass
+
+
+    def plot_object(self):
+        pass
+        
+
+    
+    def plot_clear(self):
+        pass
 
     # get information
 
@@ -244,6 +255,14 @@ class ObjectBase:
         
     
         return A, b
+
+    def get_vel_range(self):
+
+        min_vel = np.maximum(self.vel_min, self._velocity - self.info.acce * world_param.step_time)
+        max_vel = np.minimum(self.vel_max, self._velocity + self.info.acce * world_param.step_time)
+
+        return min_vel, max_vel
+
 
 
     def set_state(self, state):

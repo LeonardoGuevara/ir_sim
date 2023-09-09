@@ -50,6 +50,18 @@ class EnvPlot:
         else:
             logging.error('error input of the draw mode')
 
+    def clear_components(self, mode='all', objects=[], **kwargs):
+
+        if mode == 'dynamic':
+            [obj.plot_clear() for obj in objects if not obj.static]
+
+        elif mode == 'static':
+            pass
+
+        elif mode == 'all':
+            plt.cla()
+        
+    
 
     def draw_grid_map(self, grid_map=None, **kwargs):
         
