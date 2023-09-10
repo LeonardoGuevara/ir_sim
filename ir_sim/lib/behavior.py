@@ -1,6 +1,7 @@
 from math import inf
 import numpy as np
-from ir_sim.global_param import world_param 
+from ir_sim.global_param import world_param
+from ir_sim.util.util import relative_position, WrapToPi
 
 
 class BehaviorDiff:
@@ -11,7 +12,30 @@ class BehaviorDiff:
 
     def gen_behavior_vel(self, state, goal, min_vel, max_vel):
         
-        vel = np.zeros((2, 1))
+        if self.behavior_dict['name'] == 'dash':
+            
+            angle_tolerance = self.behavior_dict.get('angle_tolerance', 0.1)
+
+            distance, radian = relative_position(state, goal) 
+
+            diff_radian = WrapToPi( radian - state[2, 0] )
+
+            linear = max_vel[0, 0] * np.cos(diff_radian)
+
+            if abs(diff_radian) < angle_tolerance:
+                angular = 0
+            else:
+                angular = max_vel[1, 0] * np.sign(diff_radian)
+
+            return np.array([[linear], [angular]])
+        
+
+
+
+
+
+
+
 
 
     # def cal_des_vel(self, tolerance=0.12):
@@ -42,9 +66,17 @@ class BehaviorDiff:
 class BehaviorAcker:
     def __init__(self, object_info=None, behavior_dict=None) -> None:
         super().__init__(object_info, behavior_dict)
+
+        self.behavior_dict = behavior_dict
+
+
     
     def gen_behavior_vel(state, goal, min_vel, max_vel, **kwargs):
+        
         pass
+        
+
+
 
 class BehaviorOmni:
     def __init__(self) -> None:
@@ -57,13 +89,17 @@ Behavior_factory = {'diff': BehaviorDiff, 'acker': BehaviorAcker, 'omni': Behavi
 
 class Behavior:
     def __init__(self, object_info=None, behavior_dict=None) -> None:
+
         self.object_info = object_info
         self.behavior_dict = behavior_dict
+        
+        self.behavior_dynamics = Behavior_factory[object_info.dynamics](object_info, behavior_dict)
 
-        self.behavior_dynamics = Behavior_factory[object_info.dynamics]
+    def gen_vel(self, state, goal, min_vel, max_vel):
+        return self.behavior_dynamics.gen_behavior_vel(state, goal, min_vel, max_vel)
 
-    def gen_vel(self, state, goal, min_vel, max_vel, **kwargs):
-        return self.behavior_dynamics.gen_behavior_vel(state, goal, min_vel, max_vel, **kwargs)
+
+
 
 
 

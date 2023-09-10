@@ -31,7 +31,7 @@ class ObjectBase:
 
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-inf, inf], vel_max=[-inf, inf], acce=[-inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[-inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1) -> None:
 
         '''
         parameters:
@@ -83,7 +83,7 @@ class ObjectBase:
         self.static = static
         self.vel_min = np.c_[vel_min]
         self.vel_max = np.c_[vel_max]
-        self.info = ObjectInfo(self._id, shape, dynamics, role, color, static, np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range], self._goal)
+        self.info = ObjectInfo(self._id, shape, dynamics, role, color, static, np.c_[goal], np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range])
 
         # arrive judgement
         self.goal_threshold = goal_threshold
@@ -92,7 +92,7 @@ class ObjectBase:
         self.sensor = None
 
         # behavior
-        self.behavior = Behavior(self.info, behavior)
+        self.obj_behavior = Behavior(self.info, behavior)
 
         # plot 
         self.plot_patch_list = []
@@ -118,7 +118,7 @@ class ObjectBase:
             
             self.pre_process()
 
-            behavior_vel = self.vel_with_behavior(velocity)
+            behavior_vel = self.gen_behavior_vel(velocity)
 
             new_state = self._dynamics(self._state, behavior_vel, **kwargs)
             next_state = self.mid_process(new_state)
@@ -126,24 +126,23 @@ class ObjectBase:
             self._state = next_state
             self._velocity = behavior_vel
 
-
             self.sensor_step()
             self.post_process()
             self.check_arrive()
                 
             return next_state
 
-    def vel_with_behavior(self, velocity, custom_behavior=None):
+    def gen_behavior_vel(self, velocity):
 
         min_vel, max_vel = self.get_vel_range()
         
         if velocity is None:
             
-            if self.behavior is None:
+            if self.obj_behavior is None:
                 print("Error: behavior and input velocity is not defined")
 
             else:
-                behavior_vel = self.behavior.gen_vel()
+                behavior_vel = self.obj_behavior.gen_vel( self._state, self._goal, min_vel, max_vel)
             
         else:
             if isinstance(vel, list): vel = np.c_[vel]
@@ -168,7 +167,7 @@ class ObjectBase:
 
 
 
-    def custor_behavior(self, velocity, min_vel, max_vel):
+    def custom_behavior(self, velocity, min_vel, max_vel):
         pass
 
 

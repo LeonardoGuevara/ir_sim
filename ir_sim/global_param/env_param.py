@@ -1,8 +1,3 @@
-robot_list = []
-obstacle_list = []
-components = []
+objects = []
 
-# for map obstacle
-grid_map = None
-obstacle_index = None
-reso = None
+

@@ -1,6 +1,7 @@
 import os
 import sys
-from math import pi
+from math import pi, atan2
+import numpy as np
 
 def file_check(file_name):
 
@@ -50,3 +51,13 @@ def extend_list(input_list, number):
         input_list.extend([input_list[-1]]* (number - len(input_list)) )
 
     return input_list
+
+def relative_position(position1, position2, topi=True):
+
+    diff = position2[0:2]-position1[0:2]
+    distance = np.linalg.norm(diff)
+    radian = atan2(diff[1, 0], diff[0, 0])
+
+    if topi: radian = WrapToPi(radian)
+
+    return distance, radian

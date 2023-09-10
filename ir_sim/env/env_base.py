@@ -4,7 +4,7 @@ from ir_sim.util.util import file_check
 from ir_sim.world import world, MultiRobots, MultiObstacles
 from .env_plot import EnvPlot
 import threading
-from ir_sim.global_param import world_param
+from ir_sim.global_param import world_param, env_param
 import time
 import sys
 from ir_sim.world.robots.robot_factory import RobotFactory
@@ -71,6 +71,8 @@ class EnvBase:
         # set env param
         self.display = display
         self.disable_all_plot = disable_all_plot
+
+        env_param.objects = self.objects
 
         # # thread
         # self.step_thread = threading.Thread(target=self.step)
