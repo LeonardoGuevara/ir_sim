@@ -7,11 +7,10 @@ env = EnvBase('robot_world.yaml')
 for i in range(3000):
 
     env.step()
-    env.render(0.05)
+    env.render(0.01)
 
     if env.done():
         break
-
 
 
 env.end()

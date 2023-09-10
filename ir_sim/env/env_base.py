@@ -85,19 +85,16 @@ class EnvBase:
     #         print(world_param.count)
     #         self.render(world_param.step_time)
 
+    def __del__(self):
+        print('Simulated Environment End')
 
     def start(self, duration=500):
         pass
     
-
     # step
     def step(self, action=None, **kwargs):
-
         self.objects_step()
         self.world.step()
-
-
-
 
     def objects_step(self):
         [ obj.step() for obj in self.objects]
@@ -111,21 +108,70 @@ class EnvBase:
 
         if not self.disable_all_plot: 
             if self.world.sampling:
-                self.env_plot.draw_components('static', self.objects, **kwargs)
+                self.env_plot.draw_components('dynamic', self.objects, **kwargs)
                 
                 if self.display: plt.pause(interval)
 
                 # if self.save_ani: self.save_gif_figure(bbox_inches=self.bbox_inches, dpi=self.ani_dpi, **fig_kwargs)
 
-                self.env_plot.clear_components(self.ax, mode='dynamic', **kwargs)
-
+                self.env_plot.clear_components('dynamic', self.objects, **kwargs)
 
 
     def show(self):
         self.env_plot.show()
 
     def end(self):
-        print('end')
+        pass
+
+    def done(self, mode='all'):
+        
+        done_list = [ obj.done() for obj in self.objects]
+
+        if len(done_list) == 0:
+            return False
+
+        if mode == 'all':
+            return all(done_list)
+        elif mode == 'any':
+            return any(done_list)
+
+    # def end(self, ani_name='animation', fig_name='fig.png', ending_time = 3, suffix='.gif', keep_len=30, rm_fig_path=True, fig_kwargs=dict(), ani_kwargs=dict(), **kwargs):
+        
+    #     # fig_kwargs: arguments when saving the figures for animation, see https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.savefig.html for detail
+    #     # ani_kwargs: arguments for animations(gif): see https://imageio.readthedocs.io/en/v2.8.0/format_gif-pil.html#gif-pil for detail
+    #     if self.control_mode == 'keyboard': self.listener.stop()
+        
+    #     show = kwargs.get('show', self.display)
+        
+    #     if not self.disable_all_plot:
+
+    #         if self.save_ani:
+    #             saved_ani_kwargs = {'subrectangles': True}
+    #             saved_ani_kwargs.update(ani_kwargs) 
+    #             self.save_animate(ani_name, suffix, keep_len, rm_fig_path, **saved_ani_kwargs)
+
+    #         if self.save_fig or show:
+    #             self.draw_components(self.ax, mode='dynamic', **kwargs)
+            
+    #         if self.save_fig: 
+    #             if not self.fig_path.exists(): self.fig_path.mkdir()
+
+    #             self.fig.savefig(str(self.fig_path) + '/' + fig_name, bbox_inches=self.bbox_inches, dpi=self.fig_dpi, **fig_kwargs)
+
+    #         if show:
+    #             plt.show(block=False)
+    #             print(f'Figure will be closed within {ending_time:d} seconds.')
+    #             plt.pause(ending_time)
+    #             plt.close()
+
+
+    @property
+    def robot(self):
+        robot_list = [ obj for obj in self.objects if obj.role == 'robot']
+
+        return robot_list[0]
+    
+
         
 
     

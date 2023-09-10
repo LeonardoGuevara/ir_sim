@@ -30,9 +30,11 @@ class RobotDiff(ObjectBase):
   
 # shape='circle', shape_tuple=(0, 0, radius), dynamics='diff', role='robot', **kwargs
 
-    def plot(self):
-        pass
+    def plot(self, ax, show_goal=True, show_arrow=True, **kwargs):
+        super().plot(ax, show_goal=show_goal, show_arrow = show_arrow, **kwargs)
 
+
+    
 
 
 

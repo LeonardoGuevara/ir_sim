@@ -3,12 +3,14 @@ from shapely import MultiPolygon, Point, Polygon, LineString, minimum_bounding_r
 import itertools
 from typing import Optional
 from ir_sim.lib.factory import dynamics_factory
-from math import inf, pi
+from math import inf, pi, atan2, cos, sin, sqrt
 from dataclasses import dataclass
 from ir_sim.global_param import world_param 
 import logging
 from ir_sim.util.util import WrapToRegion
 from ir_sim.lib.behavior import Behavior
+import matplotlib as mpl
+
 
 @dataclass
 class ObjectInfo:
@@ -23,6 +25,7 @@ class ObjectInfo:
     vel_max: np.ndarray
     acce: np.ndarray
     angle_range: np.ndarray
+    goal_threshold: float
 
 
 class ObjectBase:
@@ -31,7 +34,7 @@ class ObjectBase:
 
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[-inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1) -> None:
 
         '''
         parameters:
@@ -83,7 +86,7 @@ class ObjectBase:
         self.static = static
         self.vel_min = np.c_[vel_min]
         self.vel_max = np.c_[vel_max]
-        self.info = ObjectInfo(self._id, shape, dynamics, role, color, static, np.c_[goal], np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range])
+        self.info = ObjectInfo(self._id, shape, dynamics, role, color, static, np.c_[goal], np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range], goal_threshold)
 
         # arrive judgement
         self.goal_threshold = goal_threshold
@@ -120,7 +123,7 @@ class ObjectBase:
 
             behavior_vel = self.gen_behavior_vel(velocity)
 
-            new_state = self._dynamics(self._state, behavior_vel, **kwargs)
+            new_state = self._dynamics(self._state, behavior_vel, world_param.step_time, **kwargs)
             next_state = self.mid_process(new_state)
 
             self._state = next_state
@@ -128,9 +131,37 @@ class ObjectBase:
 
             self.sensor_step()
             self.post_process()
-            self.check_arrive()
+            self.check_status()
                 
             return next_state
+        
+    def sensor_step(self):
+        pass
+    
+
+    # check arrive
+    def check_status(self):
+        
+        self.check_arrive()
+        self.check_collision()
+
+        if world_param.collision_mode == 'stop':
+            self.stop_flag = self.collision_flag
+        
+
+
+    def check_arrive(self):
+
+        if np.linalg.norm(self._state[:2] - self._goal[:2]) < self.goal_threshold:
+            self.arrive_flag = True
+        else:
+            self.arrive_flag = False
+
+        
+
+    def check_collision(self):
+        pass
+        
 
     def gen_behavior_vel(self, velocity):
 
@@ -142,7 +173,7 @@ class ObjectBase:
                 print("Error: behavior and input velocity is not defined")
 
             else:
-                behavior_vel = self.obj_behavior.gen_vel( self._state, self._goal, min_vel, max_vel)
+                behavior_vel = self.obj_behavior.gen_vel(self._state, self._goal, min_vel, max_vel)
             
         else:
             if isinstance(vel, list): vel = np.c_[vel]
@@ -163,7 +194,6 @@ class ObjectBase:
 
 
         return behavior_vel_clip
-
 
 
 
@@ -225,17 +255,119 @@ class ObjectBase:
         pass
     
     
-    def plot(self, ax, robot_color = 'g', goal_color='r', show_goal=True, show_text=False, show_traj=False, traj_type='-g', fontsize=10, **kwargs):
-        pass
+    def plot(self, ax, show_goal=False, show_text=False, show_arrow=False, show_uncertainty=False, show_trajectory=False, **kwargs):
 
+        # object_color = 'g', goal_color='r', show_goal=True, show_text=False, show_traj=False, traj_type='-g', fontsize=10, 
 
-    def plot_object(self):
-        pass
+        self.plot_object(ax, **kwargs)
+
+        if show_goal:
+            self.plot_goal(ax, **kwargs)
+
+        if show_text:
+            self.plot_text(ax, **kwargs)
+
+        if show_arrow:
+            self.plot_arrow(ax, **kwargs)
+
+        if show_uncertainty:
+            self.plot_uncertainty(ax, **kwargs)
+
+        if show_trajectory:
+            self.plot_trajectory(ax, **kwargs)
+
+        
+    def plot_object(self, ax, obj_color='g', **kwargs):
+
+        x = self.state[0, 0]
+        y = self.state[1, 0]
+
+        if self.shape == 'circle':
+
+            object_patch = mpl.patches.Circle(xy=(x, y), radius = self.radius, color = obj_color)
+            object_patch.set_zorder(3)
+
+        elif self.shape == 'polygon':
+            pass
         
 
+        ax.add_patch(object_patch)
+        self.plot_patch_list.append(object_patch)
+
+
+    def plot_trajectory(self, ax, **kwargs):
+        pass 
+
+    def plot_goal(self, ax, goal_color='r', **kwargs):
+
+        goal_x = self._goal[0, 0]
+        goal_y = self._goal[1, 0]
+        
+        goal_circle = mpl.patches.Circle(xy=(goal_x, goal_y), radius=self.radius, color=goal_color, alpha=0.5)
+        goal_circle.set_zorder(1)
     
-    def plot_clear(self):
+        ax.add_patch(goal_circle)
+
+        self.plot_patch_list.append(goal_circle)
+
+
+
+    def plot_text(self, ax, **kwargs):
         pass
+
+    def plot_arrow(self, ax, arrow_length=0.4, arrow_width=0.6, **kwargs):
+
+        x = self._state[0][0]
+        y = self._state[1][0]
+        theta = self._state[2][0]
+
+        arrow = mpl.patches.Arrow(x, y, arrow_length*cos(theta), arrow_length*sin(theta), width=arrow_width)
+        arrow.set_zorder(3)
+        ax.add_patch(arrow)
+        
+        self.plot_patch_list.append(arrow)
+
+
+
+    def plot_uncertainty(self, ax, **kwargs):
+        pass
+
+    def plot_clear(self):
+        
+        [patch.remove() for patch in self.plot_patch_list]
+        [line.pop(0).remove() for line in self.plot_line_list]
+        [text.remove() for text in self.plot_text_list]
+
+        self.plot_patch_list = []
+        self.plot_line_list = []
+        self.plot_text_list = []
+
+
+    def done(self):
+
+        if self.stop_flag or self.arrive_flag or self.collision_flag:
+            return True
+        else:
+            return False
+
+        
+        
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # get information
 

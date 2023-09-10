@@ -15,8 +15,13 @@ class BehaviorDiff:
         if self.behavior_dict['name'] == 'dash':
             
             angle_tolerance = self.behavior_dict.get('angle_tolerance', 0.1)
+            goal_threshold = self.object_info.goal_threshold
 
             distance, radian = relative_position(state, goal) 
+
+            if distance < goal_threshold:
+                return np.zeros((2, 1))
+
 
             diff_radian = WrapToPi( radian - state[2, 0] )
 
