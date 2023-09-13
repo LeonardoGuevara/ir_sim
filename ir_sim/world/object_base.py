@@ -7,9 +7,12 @@ from math import inf, pi, atan2, cos, sin, sqrt
 from dataclasses import dataclass
 from ir_sim.global_param import world_param 
 import logging
-from ir_sim.util.util import WrapToRegion
+from ir_sim.util.util import WrapToRegion, get_transform
 from ir_sim.lib.behavior import Behavior
 import matplotlib as mpl
+from shapely.ops import transform
+
+
 
 
 @dataclass
@@ -28,13 +31,17 @@ class ObjectInfo:
     goal_threshold: float
 
 
+    def add_property(self, key, value):
+        setattr(self, key, value)
+
+
+
 class ObjectBase:
 
     id_iter = itertools.count()
-
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1, **kwargs) -> None:
 
         '''
         parameters:
@@ -69,14 +76,14 @@ class ObjectBase:
         self._id = next(ObjectBase.id_iter)
         self._shape = shape
         self._geometry = self.construct_geometry(shape, shape_tuple)
+        self._init_geometry = self.construct_geometry(shape, shape_tuple)
 
         self._state = np.c_[state]
         self._velocity = np.c_[velocity]
         self._goal = np.c_[goal]
 
         self.dynamics = dynamics
-        self._dynamics = dynamics_factory[dynamics]
-
+    
         # flag
         self.stop_flag = False
         self.arrive_flag = False
@@ -123,22 +130,50 @@ class ObjectBase:
 
             behavior_vel = self.gen_behavior_vel(velocity)
 
-            new_state = self._dynamics(self._state, behavior_vel, world_param.step_time, **kwargs)
+            new_state = self._dynamics(behavior_vel, **kwargs)
             next_state = self.mid_process(new_state)
 
             self._state = next_state
             self._velocity = behavior_vel
+
+            self._geometry = self.geometry_transform(self._init_geometry, self._state)
 
             self.sensor_step()
             self.post_process()
             self.check_status()
                 
             return next_state
-        
+
+
     def sensor_step(self):
         pass
     
 
+    def _dynamics(self, velocity, **kwargs):
+        # default is omni
+        new_state = self._state + velocity * world_param.step_time
+
+        return new_state
+
+    def geometry_transform(self, geometry, state):
+
+        def transfor_with_state(x, y):
+
+            trans, rot = get_transform(state)
+
+            # point = np.array([[x], [y]])
+            points = np.array([x, y])
+
+            new_points = rot @ points + trans
+
+            return (new_points[0, :], new_points[1, :])
+        
+        new_geometry = transform(transfor_with_state, geometry)
+
+        return new_geometry
+
+        
+    
     # check arrive
     def check_status(self):
         
@@ -255,7 +290,7 @@ class ObjectBase:
         pass
     
     
-    def plot(self, ax, show_goal=False, show_text=False, show_arrow=False, show_uncertainty=False, show_trajectory=False, **kwargs):
+    def plot(self, ax, show_goal=False, show_text=False, show_arrow=False, show_uncertainty=False, show_trajectory=False, show_trail=False, **kwargs):
 
         # object_color = 'g', goal_color='r', show_goal=True, show_text=False, show_traj=False, traj_type='-g', fontsize=10, 
 
@@ -275,6 +310,9 @@ class ObjectBase:
 
         if show_trajectory:
             self.plot_trajectory(ax, **kwargs)
+        
+        if show_trail:
+            self.plot_trail(ax, **kwargs)
 
         
     def plot_object(self, ax, obj_color='g', **kwargs):
@@ -311,7 +349,6 @@ class ObjectBase:
         self.plot_patch_list.append(goal_circle)
 
 
-
     def plot_text(self, ax, **kwargs):
         pass
 
@@ -326,6 +363,25 @@ class ObjectBase:
         ax.add_patch(arrow)
         
         self.plot_patch_list.append(arrow)
+
+    def plot_trail(self, ax, **kwargs):
+        pass
+
+    
+    # if show_trail:
+    #         if trail_type == 'rectangle':
+    #             car_rect = mpl.patches.Rectangle(xy=(start_x, start_y), width=self.shape[0], height=self.shape[1], angle=r_phi_ang, edgecolor=self.edgecolor, fill=False, alpha=0.8, linewidth=0.8)
+    #             ax.add_patch(car_rect)
+
+    #         elif trail_type == 'circle':
+    #             x = (min(self.vertex[0, :]) + max(self.vertex[0, :])) / 2
+    #             y = (min(self.vertex[1, :]) + max(self.vertex[1, :])) / 2
+
+    #             car_circle = mpl.patches.Circle(xy=(x, y), radius = self.shape[0] / 2, edgecolor='red', fill=False)
+    #             ax.add_patch(car_circle)
+
+
+
 
 
 
@@ -455,6 +511,10 @@ class ObjectBase:
     @property
     def ineq_Ab(self):
         return self.get_inequality_Ab()
+    
+    @property
+    def vertices(self):
+        return self._geometry.exterior.coords._coords.T
 
 
 

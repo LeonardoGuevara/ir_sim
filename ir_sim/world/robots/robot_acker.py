@@ -1,41 +1,121 @@
 from ir_sim.world import ObjectBase
-
+from math import sin, cos, tan, pi
+import numpy as np
+from ir_sim.util.util import WrapToPi
+from ir_sim.global_param import world_param 
+from matplotlib import image
+import matplotlib.transforms as mtransforms
+from ir_sim.util.util import WrapToRegion, get_transform, get_affine_transform
+import matplotlib as mpl
 
 class RobotAcker(ObjectBase):
     def __init__(self, shape='rectangle', shape_tuple=None, **kwargs):
-        super(RobotAcker, self).__init__(shape=shape, shape_tuple=shape_tuple, dynamics='diff', role='robot', **kwargs)
+        super(RobotAcker, self).__init__(shape=shape, shape_tuple=shape_tuple, dynamics='acker', role='robot', **kwargs)
 
+        self.wheelbase = kwargs['wheelbase']
+        self.info.add_property('wheelbase', self.wheelbase)
+        self.length = kwargs['length']
+        self.width = kwargs['width']
 
     @classmethod
-    def construct_with_shape(cls, shape, **kwargs):
+    def create_with_shape(cls, shape_dict, **kwargs):
 
-        if shape == 'circle':
+        shape_name = shape_dict.get('name', 'rectangle')
 
-            radius = kwargs.get('radius', 0.2) 
+        if shape_name == 'circle':
+            pass
 
-            return cls(shape='circle', shape_tuple=(0, 0, radius), **kwargs)
+        elif shape_name == 'rectangle':
 
-        elif shape == 'rectangle':
+            length = kwargs.get('length', 4.6)
+            width = kwargs.get('width', 1.6)
+            wheelbase = kwargs.get('wheelbase', 3)
 
-            length = kwargs.get('length', 0.2)
-            width = kwargs.get('width', 0.1)
+            start_x = - (length - wheelbase)/2
+            start_y = - width/2
 
-            return cls(shape='polygon', shape_tuple=[(-length/2, -width/2), (length/2, -width/2), (length/2, width/2), (-length/2, width/2)], **kwargs)
+            vertices = [(start_x, start_y), (start_x + length, start_y), (start_x+length, start_y+width), (start_x, start_y + width) ]
 
+            return cls(shape='polygon', shape_tuple=vertices, wheelbase=wheelbase, length=length, width=width, **kwargs)
 
+        else:
+            raise NotImplementedError(f"Robot shape {shape_name} not implemented")
         
-# shape='circle', shape_tuple=(0, 0, radius), dynamics='diff', role='robot', **kwargs
 
-    def plot(self):
-        pass
-
-
-
-
-
-
-
+    def _dynamics(self, velocity, mode='steer', **kwargs):
         
+        phi = self._state[2, 0]
+        psi = self._state[3, 0]
+
+        if mode == 'steer':
+            psi_limit = self.vel_max[1, 0]
+
+            co_matrix = np.array([ [cos(phi), 0],  [sin(phi), 0], [tan(psi) / self.wheelbase, 0], [0, 1] ])
+
+            velocity[1, 0] = np.clip(velocity[1, 0], -psi_limit, psi_limit)
+
+        elif mode == 'angular':
+
+            co_matrix = np.array([ [cos(phi), 0],  [sin(phi), 0], [tan(psi) / self.wheelbase, 0], [0, 1] ])
+
+        elif mode == 'simplify':
+            co_matrix = np.array([ [cos(phi), 0],  [sin(phi), 0], [tan(psi) / self.wheelbase, 0], [0, 1] ])
+
+        d_state = co_matrix @ velocity
+        new_state = self._state + d_state * world_param.step_time
+        
+        if mode == 'steer': new_state[3, 0] = velocity[1, 0]
+
+        new_state[2, 0] = WrapToPi(new_state[2, 0]) 
+
+        return new_state
+
+
+    def plot(self, ax, show_goal=True, show_arrow=True, **kwargs):
+        super().plot(ax, show_goal=show_goal, show_arrow = show_arrow, **kwargs)
+
+
+    def plot_object(self, ax):
+        
+        # x = self.vertices[0, 0]
+        # y = self.vertices[1, 0]
+
+        start_x = self.vertices[0, 0]
+        start_y = self.vertices[1, 0]
+        r_phi = self._state[2, 0]
+        r_phi_ang = 180*r_phi/pi
+
+        # car_image_path = Path(current_file_frame).parent / 'car0.png'
+        car_image_path = world_param.root_path + '/world/robots/robot_description/car_green.png'
+        car_img_read = image.imread(car_image_path)
+
+        car_img = ax.imshow(car_img_read, extent=[start_x, start_x+self.length, start_y, start_y+self.width])
+        trans_data = mtransforms.Affine2D().rotate_deg_around(start_x, start_y, r_phi_ang) + ax.transData
+        car_img.set_transform(trans_data)
+
+        self.plot_patch_list.append(car_img)
+
+
+    def plot_goal(self, ax, goal_color='r', buffer_length=0.0, buffer_width=0.1, **kwargs):
+
+        goal_x = self._goal[0, 0]
+        goal_y = self._goal[1, 0]
+        theta = self._goal[2, 0]     
+
+        l = buffer_length + self.length
+        w = buffer_width + self.width   
+
+        arrow = mpl.patches.Arrow(goal_x, goal_y, l *cos(theta), l * sin(theta), width=w, color=goal_color)
+        arrow.set_zorder(3)
+        ax.add_patch(arrow)
+        
+        self.plot_patch_list.append(arrow)
+
+       
+
+
+
+
 
 
 

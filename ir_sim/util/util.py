@@ -1,6 +1,6 @@
 import os
 import sys
-from math import pi, atan2
+from math import pi, atan2, sin, cos
 import numpy as np
 
 def file_check(file_name):
@@ -61,3 +61,21 @@ def relative_position(position1, position2, topi=True):
     if topi: radian = WrapToPi(radian)
 
     return distance, radian
+
+def get_transform(state):
+    # from state to rotation and transition matrix
+    # state: (3, 1) or (2 ,1)
+    if state.shape == (2, 1):
+        rot = np.array([ [1, 0], [0, 1] ])
+        trans = state[0:2]
+
+    else:
+        rot = np.array([ [cos(state[2, 0]), -sin(state[2, 0])], [sin(state[2, 0]), cos(state[2, 0])] ])
+        trans = state[0:2]
+
+    return trans, rot 
+
+def get_affine_transform(state):
+    # 2d: 6 paramters: [a, b, d, e, xoff, yoff] reference: https://shapely.readthedocs.io/en/stable/manual.html
+    return [cos(state[2, 0]), -sin(state[2, 0]), sin(state[2, 0]), cos(state[2, 0]), state[0, 0], state[1, 0]]
+
