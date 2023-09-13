@@ -7,7 +7,7 @@ from math import inf, pi, atan2, cos, sin, sqrt
 from dataclasses import dataclass
 from ir_sim.global_param import world_param 
 import logging
-from ir_sim.util.util import WrapToRegion, get_transform, get_transform
+from ir_sim.util.util import WrapToRegion, get_transform
 from ir_sim.lib.behavior import Behavior
 import matplotlib as mpl
 from shapely.ops import transform
@@ -75,8 +75,8 @@ class ObjectBase:
 
         self._id = next(ObjectBase.id_iter)
         self._shape = shape
-        self._geometry = self.construct_geometry(shape, shape_tuple)
-
+        self._init_geometry = self.construct_geometry(shape, shape_tuple)\
+        
         self._state = np.c_[state]
         self._velocity = np.c_[velocity]
         self._goal = np.c_[goal]
@@ -540,6 +540,11 @@ class ObjectBase:
     @property
     def ineq_Ab(self):
         return self.get_inequality_Ab()
+    
+    @property
+    def vertices(self):
+        # 2*N
+        return self._geometry.exterior.coords._coords.T
 
 
 
