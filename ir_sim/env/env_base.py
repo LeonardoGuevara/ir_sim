@@ -8,6 +8,7 @@ from ir_sim.global_param import world_param, env_param
 import time
 import sys
 from ir_sim.world.robots.robot_factory import RobotFactory
+from ir_sim.world.obstacles.obstacle_factory import ObstacleFactory
 from matplotlib import pyplot as plt
 
 class EnvBase:
@@ -57,14 +58,15 @@ class EnvBase:
         self.world = world(**world_kwargs)
 
         robot_factory = RobotFactory() 
+        obstacle_factory = ObstacleFactory() 
 
         self.robot_list = [ robot_factory.create_robot(**robot_kw) for robot_kw in robot_kwargs_list]
         # self.robots_list = [ MultiRobots(**robots_kwargs) for robots_kwargs in robots_kwargs_list ]
-        # self.obstacle_list = [ Obstacle(**obstacle_kw) for obstacle_kw in obstacle_kwargs_list]
+        self.obstacle_list = [ obstacle_factory.create_obstacle(**obstacle_kw) for obstacle_kw in obstacle_kwargs_list]
         # self.obstacles_list = [ MultiRobots(**obstacles_kw) for obstacles_kw in obstacles_kwargs_list ]
         
         # self.objects = self.robot_list + self.robots_list + self.obstacle_list + self.obstacles_list  
-        self.objects = self.robot_list
+        self.objects = self.robot_list + self.obstacle_list
 
         self.env_plot = EnvPlot(self.world.grid_map, self.objects, self.world.x_range, self.world.y_range, **plot_kwargs)
 

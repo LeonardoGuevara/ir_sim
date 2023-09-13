@@ -6,8 +6,8 @@ from ir_sim.global_param import world_param
 
 
 class RobotDiff(ObjectBase):
-    def __init__(self, shape='circle', shape_tuple=None, **kwargs):
-        super(RobotDiff, self).__init__(shape=shape, shape_tuple=shape_tuple, dynamics='diff', role='robot', **kwargs)
+    def __init__(self, shape='circle', shape_tuple=None, color='g', **kwargs):
+        super(RobotDiff, self).__init__(shape=shape, shape_tuple=shape_tuple, dynamics='diff', role='robot', color=color, **kwargs)
 
 
     @classmethod

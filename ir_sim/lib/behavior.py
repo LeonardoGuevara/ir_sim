@@ -15,6 +15,9 @@ class Behavior:
     def gen_vel(self, state, goal, min_vel, max_vel):
 
 
+        if self.behavior_dict is None:
+            return np.zeros((2, 1))
+
         if self.object_info.dynamics == 'diff':
             if self.behavior_dict['name'] == 'dash':
 

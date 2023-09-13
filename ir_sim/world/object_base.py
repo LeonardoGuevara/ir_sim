@@ -7,7 +7,7 @@ from math import inf, pi, atan2, cos, sin, sqrt
 from dataclasses import dataclass
 from ir_sim.global_param import world_param 
 import logging
-from ir_sim.util.util import WrapToRegion, get_transform
+from ir_sim.util.util import WrapToRegion, get_transform, get_transform
 from ir_sim.lib.behavior import Behavior
 import matplotlib as mpl
 from shapely.ops import transform
@@ -76,11 +76,12 @@ class ObjectBase:
         self._id = next(ObjectBase.id_iter)
         self._shape = shape
         self._geometry = self.construct_geometry(shape, shape_tuple)
-        self._init_geometry = self.construct_geometry(shape, shape_tuple)
 
         self._state = np.c_[state]
         self._velocity = np.c_[velocity]
         self._goal = np.c_[goal]
+        
+        self._geometry = self.geometry_transform(self._init_geometry, self._state) 
 
         self.dynamics = dynamics
     
@@ -93,6 +94,7 @@ class ObjectBase:
         self.static = static
         self.vel_min = np.c_[vel_min]
         self.vel_max = np.c_[vel_max]
+        self.color = color
         self.info = ObjectInfo(self._id, shape, dynamics, role, color, static, np.c_[goal], np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range], goal_threshold)
 
         # arrive judgement
@@ -114,6 +116,29 @@ class ObjectBase:
 
     def __eq__(self, o: object) -> bool:
         return self._id == o._id
+
+
+    @classmethod
+    def create_with_shape(cls, shape_dict, **kwargs):
+
+        shape_name = shape_dict.get('name', 'circle')   
+             
+        if shape_name == 'circle':
+
+            radius = shape_dict.get('radius', 0.2) 
+
+            return cls(shape='circle', shape_tuple=(0, 0, radius), **kwargs)
+
+        elif shape_name == 'rectangle':
+            length = shape_dict.get('length', 0.2)
+            width = shape_dict.get('width', 0.1)
+
+            return cls(shape='polygon', shape_tuple=[(-length/2, -width/2), (length/2, -width/2), (length/2, width/2), (-length/2, width/2)], **kwargs)
+
+        else:
+            raise NotImplementedError(f"shape {shape_name} not implemented")
+
+
 
 
     def step(self, velocity=None, **kwargs):
@@ -204,8 +229,12 @@ class ObjectBase:
         
         if velocity is None:
             
-            if self.obj_behavior is None:
-                print("Error: behavior and input velocity is not defined")
+            if self.obj_behavior.behavior_dict is None:
+                self.static = True
+
+                if self.role=='robot': print("Warning: behavior and input velocity is not defined")
+
+                return np.zeros_like(self._velocity)
 
             else:
                 behavior_vel = self.obj_behavior.gen_vel(self._state, self._goal, min_vel, max_vel)
@@ -315,19 +344,19 @@ class ObjectBase:
             self.plot_trail(ax, **kwargs)
 
         
-    def plot_object(self, ax, obj_color='g', **kwargs):
+    def plot_object(self, ax, **kwargs):
 
         x = self.state[0, 0]
         y = self.state[1, 0]
 
         if self.shape == 'circle':
 
-            object_patch = mpl.patches.Circle(xy=(x, y), radius = self.radius, color = obj_color)
+            object_patch = mpl.patches.Circle(xy=(x, y), radius = self.radius, color = self.color)
             object_patch.set_zorder(3)
 
         elif self.shape == 'polygon':
-            pass
-        
+
+            object_patch = mpl.patches.Polygon(xy=self.vertices.T, color=self.color)
 
         ax.add_patch(object_patch)
         self.plot_patch_list.append(object_patch)
@@ -511,10 +540,6 @@ class ObjectBase:
     @property
     def ineq_Ab(self):
         return self.get_inequality_Ab()
-    
-    @property
-    def vertices(self):
-        return self._geometry.exterior.coords._coords.T
 
 
 
