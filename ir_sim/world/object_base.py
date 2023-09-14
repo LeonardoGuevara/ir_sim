@@ -139,12 +139,6 @@ class ObjectBase:
         else:
             raise NotImplementedError(f"shape {shape_name} not implemented")
 
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> feature-collision
     def step(self, velocity=None, **kwargs):
 
         if self.static or self.stop_flag:
@@ -201,10 +195,6 @@ class ObjectBase:
 
         return new_geometry
 
-<<<<<<< HEAD
-        
-=======
->>>>>>> feature-collision
     
     # check arrive
     def check_status(self):
