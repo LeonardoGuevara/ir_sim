@@ -5,12 +5,13 @@ from typing import Optional
 from ir_sim.lib.factory import dynamics_factory
 from math import inf, pi, atan2, cos, sin, sqrt
 from dataclasses import dataclass
-from ir_sim.global_param import world_param 
+from ir_sim.global_param import world_param, env_param
 import logging
 from ir_sim.util.util import WrapToRegion, get_transform
 from ir_sim.lib.behavior import Behavior
 import matplotlib as mpl
 from shapely.ops import transform
+import shapely
 
 
 
@@ -138,9 +139,12 @@ class ObjectBase:
         else:
             raise NotImplementedError(f"shape {shape_name} not implemented")
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> feature-collision
     def step(self, velocity=None, **kwargs):
 
         if self.static or self.stop_flag:
@@ -197,32 +201,47 @@ class ObjectBase:
 
         return new_geometry
 
+<<<<<<< HEAD
         
+=======
+>>>>>>> feature-collision
     
     # check arrive
     def check_status(self):
         
-        self.check_arrive()
-        self.check_collision()
+        self.check_arrive_status()
+        self.check_collision_status()
 
         if world_param.collision_mode == 'stop':
             self.stop_flag = self.collision_flag
+        elif world_param.collision_mode == 'reactive':
+            pass
+
+        elif world_param.collision_mode == 'unobstructed':
+            pass
+
         
 
 
-    def check_arrive(self):
+    def check_arrive_status(self):
 
         if np.linalg.norm(self._state[:2] - self._goal[:2]) < self.goal_threshold:
             self.arrive_flag = True
         else:
             self.arrive_flag = False
 
+    
+    def check_collision_status(self):
         
+        collision_flags = [ self.check_collision(obj) for obj in env_param.objects if self.id != obj.id]
 
-    def check_collision(self):
-        pass
+        self.collision_flag = any(collision_flags)
+
         
+    def check_collision(self, obj):
+        return shapely.intersects(self._geometry, obj._geometry)
 
+    
     def gen_behavior_vel(self, velocity):
 
         min_vel, max_vel = self.get_vel_range()

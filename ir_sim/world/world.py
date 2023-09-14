@@ -16,6 +16,15 @@ class world:
             width: the width of the world
             step_time: the time interval between two steps
             sample_time: the time interval between two samples
+
+            collision_mode: the collision mode of the world, 
+                            'stop'
+                            'reactive'
+                            'unobstructed'
+
+            control_mode: the control mode of the world,
+                            'auto'
+                            'keyboard'
         '''
 
         self.height = height
