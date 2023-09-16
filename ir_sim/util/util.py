@@ -2,6 +2,7 @@ import os
 import sys
 from math import pi, atan2, sin, cos
 import numpy as np
+from shapely import ops
 
 def file_check(file_name):
 
@@ -79,3 +80,19 @@ def get_affine_transform(state):
     # 2d: 6 paramters: [a, b, d, e, xoff, yoff] reference: https://shapely.readthedocs.io/en/stable/manual.html
     return [cos(state[2, 0]), -sin(state[2, 0]), sin(state[2, 0]), cos(state[2, 0]), state[0, 0], state[1, 0]]
 
+def geometry_transform(geometry, state):
+
+    def transfor_with_state(x, y):
+
+        trans, rot = get_transform(state)
+
+        # point = np.array([[x], [y]])
+        points = np.array([x, y])
+
+        new_points = rot @ points + trans
+
+        return (new_points[0, :], new_points[1, :])
+    
+    new_geometry = ops.transform(transfor_with_state, geometry)
+
+    return new_geometry

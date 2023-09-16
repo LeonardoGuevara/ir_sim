@@ -15,9 +15,8 @@ robots:
   distribute: {mode: 'manual', states: [[25, 25, 0, 0], [40, 35, 0, 0]], shapes: [[4.6, 1.6, 3, 1.6]], goals: [[27, 37, 0], [17, 42, 1]], random_bear: False}
 
   # sensor
-  sensor: 
+  sensors: 
     - type: 'lidar'
-      id: 0
       range_min: 0
       range_max: 15
       angle_range: 3.1415926

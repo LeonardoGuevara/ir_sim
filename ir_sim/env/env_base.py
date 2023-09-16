@@ -110,25 +110,25 @@ class EnvBase:
 
         if not self.disable_all_plot: 
             if self.world.sampling:
+
+                if self.display: plt.pause(interval)
+                # if self.save_ani: self.save_gif_figure(bbox_inches=self.bbox_inches, dpi=self.ani_dpi, **fig_kwargs)
+                self.env_plot.clear_components('dynamic', self.objects, **kwargs)
                 self.env_plot.draw_components('dynamic', self.objects, **kwargs)
                 
-                if self.display: plt.pause(interval)
-
-                # if self.save_ani: self.save_gif_figure(bbox_inches=self.bbox_inches, dpi=self.ani_dpi, **fig_kwargs)
-
-                self.env_plot.clear_components('dynamic', self.objects, **kwargs)
-
 
     def show(self):
         self.env_plot.show()
 
-    def end(self):
+    def end(self, ending_time=1, **kwargs):
+        print(f'Figure will be closed within {ending_time:d} seconds.')
+        plt.pause(ending_time)
+        plt.close()
         
-        pass
 
     def done(self, mode='all'):
-        
-        done_list = [ obj.done() for obj in self.objects]
+
+        done_list = [ obj.done() for obj in self.objects if obj.role=='robot']
 
         if len(done_list) == 0:
             return False
@@ -174,6 +174,7 @@ class EnvBase:
 
         return robot_list[0]
     
+ 
 
         
 

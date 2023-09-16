@@ -12,9 +12,7 @@ from ir_sim.lib.behavior import Behavior
 import matplotlib as mpl
 from shapely.ops import transform
 import shapely
-
-
-
+from ir_sim.world.sensors.sensor_factory import SensorFactory
 
 @dataclass
 class ObjectInfo:
@@ -42,7 +40,7 @@ class ObjectBase:
     id_iter = itertools.count()
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1, **kwargs) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1, sensors=None, **kwargs) -> None:
 
         '''
         parameters:
@@ -96,13 +94,18 @@ class ObjectBase:
         self.vel_min = np.c_[vel_min]
         self.vel_max = np.c_[vel_max]
         self.color = color
+        self.role = role
         self.info = ObjectInfo(self._id, shape, dynamics, role, color, static, np.c_[goal], np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range], goal_threshold)
 
         # arrive judgement
         self.goal_threshold = goal_threshold
 
         # sensor
-        self.sensor = None
+        sf = SensorFactory()
+        if sensors is not None: 
+            self.sensors = [sf.create_sensor(self._state, self._id, **sensor_kwargs) for sensor_kwargs in sensors] 
+        else:
+            self.sensors = None
 
         # behavior
         self.obj_behavior = Behavior(self.info, behavior)
@@ -169,7 +172,7 @@ class ObjectBase:
 
 
     def sensor_step(self):
-        pass
+        [sensor.step(self._state) for sensor in self.sensors]
     
 
     def _dynamics(self, velocity, **kwargs):
@@ -328,7 +331,7 @@ class ObjectBase:
         pass
     
     
-    def plot(self, ax, show_goal=False, show_text=False, show_arrow=False, show_uncertainty=False, show_trajectory=False, show_trail=False, **kwargs):
+    def plot(self, ax, show_goal=False, show_text=False, show_arrow=False, show_uncertainty=False, show_trajectory=False, show_trail=False, show_lidar=True, **kwargs):
 
         # object_color = 'g', goal_color='r', show_goal=True, show_text=False, show_traj=False, traj_type='-g', fontsize=10, 
 
@@ -351,6 +354,9 @@ class ObjectBase:
         
         if show_trail:
             self.plot_trail(ax, **kwargs)
+
+        if show_lidar and self.sensors is not None:
+            [sensor.plot(ax, **kwargs) for sensor in self.sensors]
 
         
     def plot_object(self, ax, **kwargs):
@@ -435,6 +441,8 @@ class ObjectBase:
         self.plot_patch_list = []
         self.plot_line_list = []
         self.plot_text_list = []
+
+        [sensor.plot_clear() for sensor in self.sensors]
 
 
     def done(self):

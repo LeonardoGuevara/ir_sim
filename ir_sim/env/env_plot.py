@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import logging
+from shapely import minimum_bounding_radius
 
 class EnvPlot:
 
@@ -67,6 +68,23 @@ class EnvPlot:
         
         if grid_map is not None:
             self.ax.imshow(grid_map.T, cmap='Greys', origin='lower', extent = self.x_range + self.y_range) 
+
+
+    def draw_geometry(self, geometry, **kwargs):
+        
+        if geometry.geom_type == 'Point':
+            pass
+
+        elif geometry.geom_type == 'MultiLineString':
+
+            lines = geometry.coords.xy
+
+
+
+
+
+
+
 
     def show(self):
         plt.show()
