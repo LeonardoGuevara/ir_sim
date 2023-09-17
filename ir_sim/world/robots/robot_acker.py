@@ -17,30 +17,7 @@ class RobotAcker(ObjectBase):
         self.length = kwargs['length']
         self.width = kwargs['width']
 
-    @classmethod
-    def create_with_shape(cls, shape_dict, **kwargs):
 
-        shape_name = shape_dict.get('name', 'rectangle')
-
-        if shape_name == 'circle':
-            pass
-
-        elif shape_name == 'rectangle':
-
-            length = kwargs.get('length', 4.6)
-            width = kwargs.get('width', 1.6)
-            wheelbase = kwargs.get('wheelbase', 3)
-
-            start_x = - (length - wheelbase)/2
-            start_y = - width/2
-
-            vertices = [(start_x, start_y), (start_x + length, start_y), (start_x+length, start_y+width), (start_x, start_y + width) ]
-
-            return cls(shape='polygon', shape_tuple=vertices, wheelbase=wheelbase, length=length, width=width, **kwargs)
-
-        else:
-            raise NotImplementedError(f"Robot shape {shape_name} not implemented")
-        
 
     def _dynamics(self, velocity, mode='steer', **kwargs):
         

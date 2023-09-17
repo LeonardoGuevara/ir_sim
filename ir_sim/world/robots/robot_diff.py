@@ -10,28 +10,6 @@ class RobotDiff(ObjectBase):
         super(RobotDiff, self).__init__(shape=shape, shape_tuple=shape_tuple, dynamics='diff', role='robot', color=color, **kwargs)
 
 
-    @classmethod
-    def create_with_shape(cls, shape_dict, **kwargs):
-
-        shape_name = shape_dict.get('name', 'circle')   
-             
-        if shape_name == 'circle':
-
-            radius = shape_dict.get('radius', 0.2) 
-
-            return cls(shape='circle', shape_tuple=(0, 0, radius), **kwargs)
-
-        elif shape_name == 'rectangle':
-
-            length = shape_dict.get('length', 0.2)
-            width = shape_dict.get('width', 0.1)
-
-            return cls(shape='polygon', shape_tuple=[(-length/2, -width/2), (length/2, -width/2), (length/2, width/2), (-length/2, width/2)], **kwargs)
-
-        else:
-            raise NotImplementedError(f"Robot shape {shape_name} not implemented")
-
-
     def _dynamics(self, velocity, noise=False, alpha=[0.03, 0, 0, 0.03, 0, 0],  **kwargs):
         
         # def differential_wheel_dynamics(state, velocity, step_time, noise=False, alpha = [0.03, 0, 0, 0.03, 0, 0]):

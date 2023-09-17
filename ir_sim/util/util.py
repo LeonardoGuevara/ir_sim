@@ -48,6 +48,10 @@ def WrapToRegion(rad, range):
 
 def extend_list(input_list, number):
 
+    if len(input_list) == 0:
+        return None
+
+
     if len(input_list) < number: 
         input_list.extend([input_list[-1]]* (number - len(input_list)) )
 
@@ -96,3 +100,14 @@ def geometry_transform(geometry, state):
     new_geometry = ops.transform(transfor_with_state, geometry)
 
     return new_geometry
+
+
+# def extend_list(lst, target_length):
+
+#     if len(lst) == 0:
+#         return None  # Can't extend an empty list
+    
+#     while len(lst) < target_length:
+#         lst.append(lst[-1])
+        
+#     return lst

@@ -1,7 +1,8 @@
 import yaml
 
 from ir_sim.util.util import file_check
-from ir_sim.world import world, MultiRobots, MultiObstacles
+# from ir_sim.world import world, MultiRobots, MultiObstacles
+from ir_sim.world import world
 from .env_plot import EnvPlot
 import threading
 from ir_sim.global_param import world_param, env_param
@@ -10,6 +11,10 @@ import sys
 from ir_sim.world.robots.robot_factory import RobotFactory
 from ir_sim.world.obstacles.obstacle_factory import ObstacleFactory
 from matplotlib import pyplot as plt
+from ir_sim.world.robots.multi_robots import MultiRobots
+from ir_sim.world.obstacles.multi_obstacles import MultiObstacles
+
+
 
 class EnvBase:
 
@@ -61,12 +66,16 @@ class EnvBase:
         obstacle_factory = ObstacleFactory() 
 
         self.robot_list = [ robot_factory.create_robot(**robot_kw) for robot_kw in robot_kwargs_list]
-        # self.robots_list = [ MultiRobots(**robots_kwargs) for robots_kwargs in robots_kwargs_list ]
+        self.robots_list = [ MultiRobots(**robots_kwargs) for robots_kwargs in robots_kwargs_list ]
         self.obstacle_list = [ obstacle_factory.create_obstacle(**obstacle_kw) for obstacle_kw in obstacle_kwargs_list]
-        # self.obstacles_list = [ MultiRobots(**obstacles_kw) for obstacles_kw in obstacles_kwargs_list ]
+        self.obstacles_list = [ MultiObstacles(**obstacles_kw) for obstacles_kw in obstacles_kwargs_list ]
         
-        # self.objects = self.robot_list + self.robots_list + self.obstacle_list + self.obstacles_list  
-        self.objects = self.robot_list + self.obstacle_list
+        # self.objects = self.robot_list + self.robots_list + self.obstacle_list + self.obstacles_list 
+        
+        robots_sum_list = [robot for robots in self.robots_list for robot in robots.robot_list]
+        obstacles_sum_list = [obstacle for obstacles in self.obstacles_list for obstacle in obstacles.obstacle_list]
+
+        self.objects = self.robot_list + robots_sum_list + self.obstacle_list + obstacles_sum_list
 
         self.env_plot = EnvPlot(self.world.grid_map, self.objects, self.world.x_range, self.world.y_range, **plot_kwargs)
 

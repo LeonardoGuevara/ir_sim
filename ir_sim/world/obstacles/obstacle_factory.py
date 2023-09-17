@@ -8,13 +8,13 @@ class ObstacleFactory:
     def create_obstacle(self, dynamics=None, shape=dict(), **kwargs):
 
         if dynamics == 'diff':
-            return ObstacleDiff.create_with_shape(shape, **kwargs)
+            return ObstacleDiff.create_with_shape(dynamics, shape, **kwargs)
         elif dynamics == 'acker':
             pass
         elif dynamics == 'omni':
             pass
         else:
-            return ObstacleStatic.create_with_shape(shape, **kwargs)
+            return ObstacleStatic.create_with_shape(dynamics, shape, **kwargs)
             
             
         

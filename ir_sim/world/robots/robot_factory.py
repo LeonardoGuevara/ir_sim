@@ -9,14 +9,17 @@ class RobotFactory:
     def create_robot(self, dynamics='diff', shape=dict(), **kwargs) -> ObjectBase:
 
         if dynamics == 'diff':
-            return RobotDiff.create_with_shape(shape, **kwargs)
+            return RobotDiff.create_with_shape('diff', shape, **kwargs)
         elif dynamics == 'acker':
-            return RobotAcker.create_with_shape(shape, **kwargs)
+            return RobotAcker.create_with_shape('acker', shape, **kwargs)
         elif dynamics == 'omni':
             # return RobotOmni(**kwargs)
             pass
         else:
             raise NotImplementedError(f"Robot dynamics {dynamics} not implemented")
+    
+    
+    
             
         
     # def __init__(self, type='diff', shape='circle', **kwargs) -> None:

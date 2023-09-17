@@ -74,7 +74,7 @@ class ObjectBase:
 
         self._id = next(ObjectBase.id_iter)
         self._shape = shape
-        self._init_geometry = self.construct_geometry(shape, shape_tuple)\
+        self._init_geometry = self.construct_geometry(shape, shape_tuple)
         
         self._state = np.c_[state]
         self._velocity = np.c_[velocity]
@@ -105,7 +105,7 @@ class ObjectBase:
         if sensors is not None: 
             self.sensors = [sf.create_sensor(self._state, self._id, **sensor_kwargs) for sensor_kwargs in sensors] 
         else:
-            self.sensors = None
+            self.sensors = []
 
         # behavior
         self.obj_behavior = Behavior(self.info, behavior)
@@ -123,8 +123,9 @@ class ObjectBase:
 
 
     @classmethod
-    def create_with_shape(cls, shape_dict, **kwargs):
+    def create_with_shape(cls, dynamics_name, shape_dict, **kwargs):
 
+        
         shape_name = shape_dict.get('name', 'circle')   
              
         if shape_name == 'circle':
@@ -134,10 +135,38 @@ class ObjectBase:
             return cls(shape='circle', shape_tuple=(0, 0, radius), **kwargs)
 
         elif shape_name == 'rectangle':
-            length = shape_dict.get('length', 0.2)
-            width = shape_dict.get('width', 0.1)
 
-            return cls(shape='polygon', shape_tuple=[(-length/2, -width/2), (length/2, -width/2), (length/2, width/2), (-length/2, width/2)], **kwargs)
+            if dynamics_name == 'diff':
+                length = shape_dict.get('length', 0.2)
+                width = shape_dict.get('width', 0.1)
+
+                return cls(shape='polygon', shape_tuple=[(-length/2, -width/2), (length/2, -width/2), (length/2, width/2), (-length/2, width/2)], **kwargs)
+            
+            elif dynamics_name == 'acker':
+
+                length = kwargs.get('length', 4.6)
+                width = kwargs.get('width', 1.6)
+                wheelbase = kwargs.get('wheelbase', 3)
+
+                start_x = - (length - wheelbase)/2
+                start_y = - width/2
+
+                vertices = [(start_x, start_y), (start_x + length, start_y), (start_x+length, start_y+width), (start_x, start_y + width) ]
+
+                return cls(shape='polygon', shape_tuple=vertices, wheelbase=wheelbase, length=length, width=width, **kwargs)
+            
+            else:
+
+                length = shape_dict.get('length', 0.2)
+                width = shape_dict.get('width', 0.1)
+
+                return cls(shape='polygon', shape_tuple=[(-length/2, -width/2), (length/2, -width/2), (length/2, width/2), (-length/2, width/2)], **kwargs)
+
+
+
+
+            
+
 
         else:
             raise NotImplementedError(f"shape {shape_name} not implemented")
@@ -177,7 +206,10 @@ class ObjectBase:
 
     def _dynamics(self, velocity, **kwargs):
         # default is omni
-        new_state = self._state + velocity * world_param.step_time
+        if not self.static:
+            new_state = self._state[0:2] + velocity * world_param.step_time
+        else:
+            new_state = self._state
 
         return new_state
 
@@ -242,9 +274,9 @@ class ObjectBase:
         if velocity is None:
             
             if self.obj_behavior.behavior_dict is None:
-                self.static = True
+                # self.static = True
 
-                if self.role=='robot': print("Warning: behavior and input velocity is not defined")
+                if self.role=='robot': print("Warning: behavior and input velocity is not defined, robot will stay static")
 
                 return np.zeros_like(self._velocity)
 
@@ -355,7 +387,7 @@ class ObjectBase:
         if show_trail:
             self.plot_trail(ax, **kwargs)
 
-        if show_lidar and self.sensors is not None:
+        if show_lidar:
             [sensor.plot(ax, **kwargs) for sensor in self.sensors]
 
         

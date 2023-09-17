@@ -1,6 +1,6 @@
 from ir_sim.env import EnvBase
 
-env = EnvBase('collision_world.yaml')
+env = EnvBase('multi_objects_world.yaml')
 
 for i in range(300):
 
@@ -10,4 +10,4 @@ for i in range(300):
     if env.done():
         break
 
-env.end()
+env.end(10)
