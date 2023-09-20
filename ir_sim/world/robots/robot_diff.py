@@ -10,7 +10,7 @@ class RobotDiff(ObjectBase):
         super(RobotDiff, self).__init__(shape=shape, shape_tuple=shape_tuple, dynamics='diff', role='robot', color=color, **kwargs)
 
 
-    def _dynamics(self, velocity, noise=False, alpha=[0.03, 0, 0, 0.03, 0, 0],  **kwargs):
+    def _dynamics(self, velocity, mode='diff', noise=False, alpha=[0.03, 0, 0, 0.03, 0, 0],  **kwargs):
         
         # def differential_wheel_dynamics(state, velocity, step_time, noise=False, alpha = [0.03, 0, 0, 0.03, 0, 0]):
 
@@ -19,9 +19,18 @@ class RobotDiff(ObjectBase):
 
         state: [x, y, theta]   (3*1) vector
         velocity: [linear, angular]  (2*1) vector
+        mode: 'diff', 'omni', 'wheel', 
         '''
 
         assert velocity.shape==(2, 1)
+
+        if mode == 'diff':
+            pass
+        elif mode == 'omni':
+            pass
+        elif mode == 'wheel':
+            pass
+
 
         if noise:
             std_linear = np.sqrt(alpha[0] * (velocity[0, 0] ** 2) + alpha[1] * (velocity[1, 0] ** 2))

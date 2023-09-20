@@ -40,7 +40,7 @@ class ObjectBase:
     id_iter = itertools.count()
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1, sensors=None, **kwargs) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1, sensors=None, dynamics_dict=dict(), **kwargs) -> None:
 
         '''
         parameters:
@@ -83,6 +83,7 @@ class ObjectBase:
         self._geometry = self.geometry_transform(self._init_geometry, self._state) 
 
         self.dynamics = dynamics
+        self.dynamics_dict = dynamics_dict
     
         # flag
         self.stop_flag = False
@@ -162,12 +163,6 @@ class ObjectBase:
 
                 return cls(shape='polygon', shape_tuple=[(-length/2, -width/2), (length/2, -width/2), (length/2, width/2), (-length/2, width/2)], **kwargs)
 
-
-
-
-            
-
-
         else:
             raise NotImplementedError(f"shape {shape_name} not implemented")
 
@@ -183,7 +178,7 @@ class ObjectBase:
             
             self.pre_process()
 
-            behavior_vel = self.gen_behavior_vel(velocity)
+            behavior_vel = self.gen_behavior_vel(velocity, )
 
             new_state = self._dynamics(behavior_vel, **kwargs)
             next_state = self.mid_process(new_state)

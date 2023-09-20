@@ -8,7 +8,7 @@ world:
   control_mode: 'auto'  # 'keyboard', 'auto'
 
 robots:
-  - dynamics: 'diff'
+  - dynamics: {name: 'diff'}
     number: 2
     distribution: {mode: 'manual'}
     shapes: 
@@ -25,7 +25,6 @@ robots:
       - {name: 'dash'} # move toward to the goal directly 
 
 
-
 obstacles:
   - number: 10
     distribution: {mode: 'manual'}
@@ -35,9 +34,6 @@ obstacles:
 
     states: [[20, 34], [31, 38], [10, 20], [41, 25], [20, 13], [16, 26], [10, 24], [18, 20], [16, 26], [19, 26], [10, 30]]
 
-
-
-# mode: 'manual', states: [[20, 34], [31, 38], [10, 20], [41, 25], [20, 13], [16, 26], [10, 24], [18, 20], [16, 26], [19, 26], [10, 30]], shapes: [1.5, 1.0, 1.0]
 
 
 

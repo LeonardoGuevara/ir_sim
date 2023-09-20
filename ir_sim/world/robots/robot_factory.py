@@ -6,13 +6,15 @@ from ir_sim.world import ObjectBase
 
 class RobotFactory:
 
-    def create_robot(self, dynamics='diff', shape=dict(), **kwargs) -> ObjectBase:
+    def create_robot(self, dynamics=dict(), shape=dict(), **kwargs) -> ObjectBase:
 
-        if dynamics == 'diff':
-            return RobotDiff.create_with_shape('diff', shape, **kwargs)
-        elif dynamics == 'acker':
-            return RobotAcker.create_with_shape('acker', shape, **kwargs)
-        elif dynamics == 'omni':
+        dynamics_name = dynamics.pop('name', 'omni')
+
+        if dynamics_name == 'diff':
+            return RobotDiff.create_with_shape('diff', shape, dynamics_dict=dynamics, **kwargs)
+        elif dynamics_name == 'acker':
+            return RobotAcker.create_with_shape('acker', shape, dynamics_dict=dynamics, **kwargs)
+        elif dynamics_name == 'omni':
             # return RobotOmni(**kwargs)
             pass
         else:
