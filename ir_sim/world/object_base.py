@@ -79,8 +79,13 @@ class ObjectBase:
         self._init_geometry = self.construct_geometry(shape, shape_tuple)
         
         self._state = np.c_[state]
+        self._init_state = np.c_[state]
+
         self._velocity = np.c_[velocity]
+        self._init_velocity = np.c_[velocity]
+
         self._goal = np.c_[goal]
+        self._init_goal = np.c_[goal]
         
         self._geometry = self.geometry_transform(self._init_geometry, self._state) 
 
@@ -100,6 +105,8 @@ class ObjectBase:
         self.role = role
         self.info = ObjectInfo(self._id, shape, dynamics, role, color, static, np.c_[goal], np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range], goal_threshold)
 
+        self.trajectory = []
+
         # arrive judgement
         self.goal_threshold = goal_threshold
         self.arrive_mode = arrive_mode #
@@ -115,6 +122,8 @@ class ObjectBase:
 
         # behavior
         self.obj_behavior = Behavior(self.info, behavior)
+
+
 
         # plot 
         self.plot_patch_list = []
@@ -196,12 +205,14 @@ class ObjectBase:
             self.sensor_step()
             self.post_process()
             self.check_status()
+
+            self.trajectory.append(self._state.copy())
                 
             return next_state
 
 
     def sensor_step(self):
-        [sensor.step(self._state) for sensor in self.sensors]
+        [sensor.step(self._state[0:3]) for sensor in self.sensors]
     
 
     def _dynamics(self, velocity, **kwargs):
@@ -289,8 +300,8 @@ class ObjectBase:
                 behavior_vel = self.obj_behavior.gen_vel(self._state, self._goal, min_vel, max_vel)
             
         else:
-            if isinstance(vel, list): vel = np.c_[vel]
-            if velocity.ndim == 1: vel = vel[:, np.newaxis]
+            if isinstance(velocity, list): velocity = np.c_[velocity]
+            if velocity.ndim == 1: velocity = velocity[:, np.newaxis]
 
             assert velocity.shape == self.vel_dim
 
@@ -373,7 +384,7 @@ class ObjectBase:
         pass
     
     
-    def plot(self, ax, show_goal=False, show_text=False, show_arrow=False, show_uncertainty=False, show_trajectory=False, show_trail=False, show_lidar=True, **kwargs):
+    def plot(self, ax, show_goal=False, show_text=False, show_arrow=False, show_uncertainty=False, show_trajectory=False, show_trail=False, show_sensor=True, **kwargs):
 
         # object_color = 'g', goal_color='r', show_goal=True, show_text=False, show_traj=False, traj_type='-g', fontsize=10, 
 
@@ -397,7 +408,7 @@ class ObjectBase:
         if show_trail:
             self.plot_trail(ax, **kwargs)
 
-        if show_lidar:
+        if show_sensor:
             [sensor.plot(ax, **kwargs) for sensor in self.sensors]
 
         
@@ -419,8 +430,13 @@ class ObjectBase:
         self.plot_patch_list.append(object_patch)
 
 
-    def plot_trajectory(self, ax, **kwargs):
-        pass 
+    def plot_trajectory(self, ax, traj_type='g-', **kwargs):
+        
+        x_list = [t[0, 0] for t in self.trajectory]
+        y_list = [t[1, 0] for t in self.trajectory]
+        
+        self.plot_line_list.append(ax.plot(x_list, y_list, traj_type))
+         
 
     def plot_goal(self, ax, goal_color='r', **kwargs):
 
@@ -493,6 +509,16 @@ class ObjectBase:
             return True
         else:
             return False
+        
+    def reset(self):
+        self._state = self._init_state.copy()
+        self._goal = self._init_goal.copy()
+        self._velocity = self._init_velocity.copy()
+
+        self.collision_flag = False
+        self.arrive_flag = False
+        self.stop_flag = False
+        self.trajectory = []
 
         
         

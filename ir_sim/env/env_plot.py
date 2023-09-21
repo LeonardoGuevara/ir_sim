@@ -8,10 +8,12 @@ import os
 import imageio
 import shutil
 import glob
+from math import sin, cos
+import numpy as np
 
 class EnvPlot:
 
-    def __init__(self, grid_map=None, objects=[], x_range=[0, 10], y_range=[0, 10], subplot=False, saved_figure=dict(), saved_ani=dict(), **kwargs) -> None:
+    def __init__(self, grid_map=None, objects=[], x_range=[0, 10], y_range=[0, 10], subplot=False, saved_figure=dict(), saved_ani=dict(), disable_all_plot=False, **kwargs) -> None:
 
         if not subplot:
             self.fig, self.ax = plt.subplots()
@@ -30,6 +32,10 @@ class EnvPlot:
 
         self.saved_figure_kwargs = saved_figure
         self.saved_ani_kwargs = saved_ani
+
+        self.disable_all_plot = disable_all_plot
+
+        self.dyna_line_list = []
 
 
     def init_plot(self, grid_map, objects, no_axis=False):
@@ -50,13 +56,13 @@ class EnvPlot:
     def draw_components(self, mode='all', objects=[], **kwargs):
         # mode: static, dynamic, all
         if mode == 'static':
-            [obj.plot(self.ax) for obj in objects if obj.static]
+            [obj.plot(self.ax, **kwargs) for obj in objects if obj.static]
                 
         elif mode == 'dynamic':
-            [obj.plot(self.ax) for obj in objects if not obj.static]
+            [obj.plot(self.ax, **kwargs) for obj in objects if not obj.static]
 
         elif mode == 'all':
-            [obj.plot(self.ax) for obj in objects]
+            [obj.plot(self.ax, **kwargs) for obj in objects]
         else:
             logging.error('error input of the draw mode')
 
@@ -64,6 +70,9 @@ class EnvPlot:
 
         if mode == 'dynamic':
             [obj.plot_clear() for obj in objects if not obj.static]
+            [line.pop(0).remove() for line in self.dyna_line_list]
+
+            self.dyna_line_list = []
 
         elif mode == 'static':
             pass
@@ -87,6 +96,31 @@ class EnvPlot:
 
             lines = geometry.coords.xy
 
+    def draw_trajectory(self, traj, traj_type='g-', label='trajectory', show_direction=False, refresh=False, **kwargs):
+        # traj: a list of points
+        if isinstance(traj, list):
+            path_x_list = [p[0, 0] for p in traj]
+            path_y_list = [p[1, 0] for p in traj]
+        elif isinstance(traj, np.ndarray):
+            # raw*column: points * num
+            path_x_list = [p[0] for p in traj.T]
+            path_y_list = [p[1] for p in traj.T]
+
+        if not self.disable_all_plot: 
+            line = self.ax.plot(path_x_list, path_y_list, traj_type, label=label, **kwargs)
+
+        if show_direction:
+            if isinstance(traj, list):
+                u_list = [cos(p[2, 0]) for p in traj]
+                y_list = [sin(p[2, 0]) for p in traj]
+            elif isinstance(traj, np.ndarray):
+                u_list = [cos(p[2]) for p in traj.T]
+                y_list = [sin(p[2]) for p in traj.T]
+
+            self.ax.quiver(path_x_list, path_y_list, u_list, y_list)
+
+        if refresh and not self.disable_all_plot: 
+            self.dyna_line_list.append(line)
 
     # save animation and figure 
     def save_gif_figure(self, format='png', **kwargs):

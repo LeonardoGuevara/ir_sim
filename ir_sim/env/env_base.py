@@ -107,11 +107,11 @@ class EnvBase:
     
     # step
     def step(self, action=None, **kwargs):
-        self.objects_step()
+        self.objects_step(action)
         self.world.step()
 
-    def objects_step(self):
-        [ obj.step() for obj in self.objects]
+    def objects_step(self, action=None):
+        [ obj.step(action) for obj in self.objects]
 
 
         
@@ -133,6 +133,12 @@ class EnvBase:
 
     def show(self):
         self.env_plot.show()
+
+
+    def draw_trajectory(self, traj, traj_type='g-', **kwargs):
+        self.env_plot.draw_trajectory(traj, traj_type, **kwargs)
+
+
 
     def end(self, ending_time=1, **kwargs):
 
@@ -156,6 +162,28 @@ class EnvBase:
             return all(done_list)
         elif mode == 'any':
             return any(done_list)
+        
+    def reset(self):
+        self.reset_all() 
+
+    def reset_all(self):
+        [obj.reset() for obj in self.objects]
+        
+
+    #     def reset(self, mode='now', **kwargs):
+    #     # mode: 
+    #     #   default: reset the env now
+    #     #   any: reset all the env when any robot done
+    #     #   all: reset all the env when all robots done
+    #     #   single: reset one robot who has done, depending on the done list
+    #     if mode == 'now':
+    #         self.reset_all() 
+    #     else:
+    #         done_list = self.done_list(**kwargs)
+    #         if mode == 'any' and any(done_list): self.reset_all()
+    #         elif mode == 'all' and all(done_list): self.reset_all()
+    #         elif mode == 'single': 
+    #             [self.reset_single(i) for i, done in enumerate(done_list) if done]
 
     # def end(self, ani_name='animation', fig_name='fig.png', ending_time = 3, suffix='.gif', keep_len=30, rm_fig_path=True, fig_kwargs=dict(), ani_kwargs=dict(), **kwargs):
         

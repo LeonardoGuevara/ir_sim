@@ -19,10 +19,10 @@ class MultiObstacles(MultiObjects):
 
         if self.behavior_list is None:
 
-            self.obstacle_list = [ temp.create_obstacle(dynamics, shape, state=state, **kwargs) for state, shape in zip(self.state_list, self.shape_list) ]
+            self.obstacle_list = [ temp.create_obstacle(dynamics, shape=shape, state=state, **kwargs) for state, shape in zip(self.state_list, self.shape_list) ]
 
         else:
-            self.obstacle_list = [ temp.create_obstacle(dynamics, shape, state=state, behavior=behavior, **kwargs) for state, shape, behavior in zip(self.state_list, self.shape_list, self.behavior_list) ]
+            self.obstacle_list = [ temp.create_obstacle(dynamics, shape=shape, state=state, behavior=behavior, **kwargs) for state, shape, behavior in zip(self.state_list, self.shape_list, self.behavior_list) ]
 
         
 
