@@ -8,11 +8,25 @@ class RobotFactory:
 
     def create_robot(self, dynamics_name, dynamics_dict=dict(), shape=dict(), **kwargs) -> ObjectBase:
 
-
         if dynamics_name == 'diff':
             return RobotDiff.create_with_shape('diff', shape, dynamics_dict=dynamics_dict, **kwargs)
         elif dynamics_name == 'acker':
             return RobotAcker.create_with_shape('acker', shape, dynamics_dict=dynamics_dict, **kwargs)
+        elif dynamics_name == 'omni':
+            # return RobotOmni(**kwargs)
+            pass
+        else:
+            raise NotImplementedError(f"Robot dynamics {dynamics_name} not implemented")
+        
+    
+    def create_robot_single(self, dynamics, shape=dict(), **kwargs):
+
+        dynamics_name = dynamics.pop('name', 'omni')
+        
+        if dynamics_name == 'diff':
+            return RobotDiff.create_with_shape('diff', shape, dynamics_dict=dynamics, **kwargs)
+        elif dynamics_name == 'acker':
+            return RobotAcker.create_with_shape('acker', shape, dynamics_dict=dynamics, **kwargs)
         elif dynamics_name == 'omni':
             # return RobotOmni(**kwargs)
             pass

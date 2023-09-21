@@ -27,7 +27,7 @@ class EnvBase:
     
     '''
 
-    def __init__(self, world_name=None, display=True, disable_all_plot=False, **kwargs):
+    def __init__(self, world_name=None, display=True, disable_all_plot=False, save_ani=False, **kwargs):
 
         world_file_path = file_check(world_name)
         
@@ -65,9 +65,9 @@ class EnvBase:
         robot_factory = RobotFactory() 
         obstacle_factory = ObstacleFactory() 
 
-        self.robot_list = [ robot_factory.create_robot(**robot_kw) for robot_kw in robot_kwargs_list]
+        self.robot_list = [ robot_factory.create_robot_single(**robot_kw) for robot_kw in robot_kwargs_list]
         self.robots_list = [ MultiRobots(**robots_kwargs) for robots_kwargs in robots_kwargs_list ]
-        self.obstacle_list = [ obstacle_factory.create_obstacle(**obstacle_kw) for obstacle_kw in obstacle_kwargs_list]
+        self.obstacle_list = [ obstacle_factory.create_obstacle_single(**obstacle_kw) for obstacle_kw in obstacle_kwargs_list]
         self.obstacles_list = [ MultiObstacles(**obstacles_kw) for obstacles_kw in obstacles_kwargs_list ]
         
         # self.objects = self.robot_list + self.robots_list + self.obstacle_list + self.obstacles_list 
@@ -82,6 +82,8 @@ class EnvBase:
         # set env param
         self.display = display
         self.disable_all_plot = disable_all_plot
+
+        self.save_ani = save_ani
 
         env_param.objects = self.objects
 
@@ -112,7 +114,7 @@ class EnvBase:
 
 
         
-    def render(self, interval=0.05, fig_kwargs=dict(), **kwargs):
+    def render(self, interval=0.05, **kwargs):
 
         # figure_args: arguments when saving the figures for animation, see https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.savefig.html for detail
         # default figure arguments
@@ -121,7 +123,9 @@ class EnvBase:
             if self.world.sampling:
 
                 if self.display: plt.pause(interval)
-                # if self.save_ani: self.save_gif_figure(bbox_inches=self.bbox_inches, dpi=self.ani_dpi, **fig_kwargs)
+
+                if self.save_ani: self.env_plot.save_gif_figure(**kwargs)
+
                 self.env_plot.clear_components('dynamic', self.objects, **kwargs)
                 self.env_plot.draw_components('dynamic', self.objects, **kwargs)
                 
@@ -130,6 +134,11 @@ class EnvBase:
         self.env_plot.show()
 
     def end(self, ending_time=1, **kwargs):
+
+        if self.save_ani:
+            self.env_plot.save_animate(**kwargs)
+
+
         print(f'Figure will be closed within {ending_time:d} seconds.')
         plt.pause(ending_time)
         plt.close()

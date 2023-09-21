@@ -1,5 +1,10 @@
 {
     "settings": {
         "ros.distro": "noetic"
-    }
+    },
+    "folders": [
+        {
+            "path": "../../.."
+        }
+    ]
 }

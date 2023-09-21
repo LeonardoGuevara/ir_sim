@@ -2,10 +2,16 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import logging
 from shapely import minimum_bounding_radius
+from ir_sim.global_param.path_param import path_manager as pm
+from ir_sim.global_param import world_param
+import os
+import imageio
+import shutil
+import glob
 
 class EnvPlot:
 
-    def __init__(self, grid_map=None, objects=[], x_range=[0, 10], y_range=[0, 10], subplot=False,  **kwargs) -> None:
+    def __init__(self, grid_map=None, objects=[], x_range=[0, 10], y_range=[0, 10], subplot=False, saved_figure=dict(), saved_ani=dict(), **kwargs) -> None:
 
         if not subplot:
             self.fig, self.ax = plt.subplots()
@@ -21,6 +27,9 @@ class EnvPlot:
         
         # 
         self.corlor_map.update(kwargs.get('corlor_map', dict()))
+
+        self.saved_figure_kwargs = saved_figure
+        self.saved_ani_kwargs = saved_ani
 
 
     def init_plot(self, grid_map, objects, no_axis=False):
@@ -62,7 +71,6 @@ class EnvPlot:
         elif mode == 'all':
             plt.cla()
         
-    
 
     def draw_grid_map(self, grid_map=None, **kwargs):
         
@@ -80,12 +88,61 @@ class EnvPlot:
             lines = geometry.coords.xy
 
 
+    # save animation and figure 
+    def save_gif_figure(self, format='png', **kwargs):
+
+        # saved_figure_kwargs: arguments when saving the figures for animation, see https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.savefig.html for detail
+
+        fp = pm.ani_buffer_path
+        
+        if not os.path.exists(fp): os.makedirs(fp)  
+
+        order = str(world_param.count).zfill(3)
+
+        self.saved_figure_kwargs.update({'dpi': 300, 'bbox_inches': 'tight'})
+        self.saved_figure_kwargs.update(kwargs)
+
+        self.fig.savefig(fp+'/'+order+'.'+format, format=format, **self.saved_figure_kwargs)
 
 
+    def save_animate(self, **kwargs):
+        
+        # saved_ani_kwargs: arguments for animations(gif): see https://imageio.readthedocs.io/en/v2.8.0/format_gif-pil.html#gif-pil for detail
 
+        self.saved_ani_kwargs.update({'subrectangles': True})
+        self.saved_ani_kwargs.update(kwargs)
 
+        ani_name = self.saved_ani_kwargs.get('ani_name', 'animation')
+        suffix = self.saved_ani_kwargs.get('suffix', '.gif')
+        keep_len = self.saved_ani_kwargs.get('keep_len', 30)
+        rm_fig_path = self.saved_ani_kwargs.get('rm_fig_path', True)
 
+        print('Start to create animation')
 
+        ap = pm.ani_path
+        fp = pm.ani_buffer_path
+
+        if not os.path.exists(ap): os.makedirs(ap)  
+     
+        images = list(glob.glob(fp + '/*.png'))
+
+        images.sort()
+        image_list = []
+        for i, file_name in enumerate(images):
+
+            if i == 0: continue
+
+            image_list.append(imageio.imread(str(file_name)))
+            if i == len(images) - 1:
+                for j in range(keep_len):
+                    image_list.append(imageio.imread(str(file_name)))
+
+        imageio.mimsave(ap +'/'+ ani_name + suffix, image_list, **self.saved_ani_kwargs)
+        print('Create animation successfully, the animation file is saved in the path ' + ap)
+
+        if rm_fig_path: shutil.rmtree(fp)
+
+        
     def show(self):
         plt.show()
 
