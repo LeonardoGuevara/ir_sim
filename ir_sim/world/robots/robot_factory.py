@@ -6,19 +6,18 @@ from ir_sim.world import ObjectBase
 
 class RobotFactory:
 
-    def create_robot(self, dynamics=dict(), shape=dict(), **kwargs) -> ObjectBase:
+    def create_robot(self, dynamics_name, dynamics_dict=dict(), shape=dict(), **kwargs) -> ObjectBase:
 
-        dynamics_name = dynamics.pop('name', 'omni')
 
         if dynamics_name == 'diff':
-            return RobotDiff.create_with_shape('diff', shape, dynamics_dict=dynamics, **kwargs)
+            return RobotDiff.create_with_shape('diff', shape, dynamics_dict=dynamics_dict, **kwargs)
         elif dynamics_name == 'acker':
-            return RobotAcker.create_with_shape('acker', shape, dynamics_dict=dynamics, **kwargs)
+            return RobotAcker.create_with_shape('acker', shape, dynamics_dict=dynamics_dict, **kwargs)
         elif dynamics_name == 'omni':
             # return RobotOmni(**kwargs)
             pass
         else:
-            raise NotImplementedError(f"Robot dynamics {dynamics} not implemented")
+            raise NotImplementedError(f"Robot dynamics {dynamics_name} not implemented")
     
     
     

@@ -19,7 +19,7 @@ class RobotAcker(ObjectBase):
 
 
 
-    def _dynamics(self, velocity, mode='steer', **kwargs):
+    def _dynamics(self, velocity, mode='steer', noise=False, alpha=[0.03, 0, 0, 0.03, 0, 0], **kwargs):
         
         phi = self._state[2, 0]
         psi = self._state[3, 0]

@@ -180,7 +180,7 @@ class ObjectBase:
 
             behavior_vel = self.gen_behavior_vel(velocity, )
 
-            new_state = self._dynamics(behavior_vel, **kwargs)
+            new_state = self._dynamics(behavior_vel, **self.dynamics_dict, **kwargs)
             next_state = self.mid_process(new_state)
 
             self._state = next_state

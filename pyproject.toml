@@ -24,7 +24,8 @@ dependencies = ['matplotlib',
                 'pyyaml',
                 'pynput',
                 'imageio',
-                'pathlib',]
+                'pathlib',
+                'shapely']
 
 
 [tool.setuptools.packages.find]

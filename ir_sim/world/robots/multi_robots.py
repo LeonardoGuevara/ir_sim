@@ -18,13 +18,14 @@ class MultiRobots(MultiObjects):
 
         # self.robot_list = [ temp.create_robot(dynamics, shape, state=state, behavior=behavior, **kwargs) for state, shape, behavior in zip(self.state_list, self.shape_list, self.behavior_list) ]
 
+        dynamics_name = dynamics.pop('name', 'omni')
+
 
         if self.behavior_list is None:
-
-            self.robot_list = [ temp.create_robot(dynamics, shape, state=state, **kwargs) for state, shape in zip(self.state_list, self.shape_list) ]
+            self.robot_list = [ temp.create_robot(dynamics_name, dynamics, shape, state=state, **kwargs) for state, shape in zip(self.state_list, self.shape_list) ]
 
         else:
-            self.robot_list = [ temp.create_robot(dynamics, shape, state=state, behavior=behavior, **kwargs) for state, shape, behavior in zip(self.state_list, self.shape_list, self.behavior_list) ]
+            self.robot_list = [ temp.create_robot(dynamics_name, dynamics, shape, state=state, behavior=behavior, **kwargs) for state, shape, behavior in zip(self.state_list, self.shape_list, self.behavior_list) ]
 
         
 
