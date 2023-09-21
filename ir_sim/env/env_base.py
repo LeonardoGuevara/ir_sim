@@ -76,6 +76,7 @@ class EnvBase:
         obstacles_sum_list = [obstacle for obstacles in self.obstacles_list for obstacle in obstacles.obstacle_list]
 
         self.objects = self.robot_list + robots_sum_list + self.obstacle_list + obstacles_sum_list
+        
 
         self.env_plot = EnvPlot(self.world.grid_map, self.objects, self.world.x_range, self.world.y_range, **plot_kwargs)
 
@@ -191,8 +192,17 @@ class EnvBase:
         robot_list = [ obj for obj in self.objects if obj.role == 'robot']
 
         return robot_list[0]
+
+    def get_current_robots(self):
+        return [obj for obj in self.objects if obj.role == 'robot']
+
+
     
- 
+    def get_lidar_scan(self, id=0):
+        r_list = self.get_current_robots()
+
+        return r_list[id].get_lidar_scan()
+
 
         
 

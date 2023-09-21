@@ -7,14 +7,17 @@ from shapely import get_coordinates
 from matplotlib.collections import LineCollection
 
 class Lidar2D:
-    def __init__(self, state=None, obj_id=0, range_min=0, range_max=10, angle_range = pi, number=100, scan_time=0.1, noise=False, std=0.2, angle_std=0.02, offset=[0, 0, 0], reso=0.05, alpha=0.3, **kwargs) -> None:
+    def __init__(self, state=None, obj_id=0, range_min=0, range_max=10, angle_range = pi, number=100, scan_time=0.1, noise=False, std=0.2, angle_std=0.02, offset=[0, 0, 0], alpha=0.3, **kwargs) -> None:
         
+        self.sensor_type = 'lidar'
+
         self.range_min = range_min
         self.range_max = range_max
 
         self.angle_range = angle_range
         self.angle_min = - angle_range/ 2
         self.angle_max = angle_range / 2
+        self.angle_inc = angle_range / number #
         
         self.number = number
         self.scan_time = scan_time
@@ -22,13 +25,12 @@ class Lidar2D:
         self.std = std
         self.angle_std = angle_std
         self.offset = np.c_[offset] 
-        self.reso = reso
         self.alpha = alpha
 
+        
         self.time_inc = (angle_range / (2*pi) ) * scan_time / number # 
         self.range_data = range_max * np.ones(number,)
         self.angle_list = np.linspace(self.angle_min, self.angle_max, num=number)
-        self.sample_num = int( (self.range_max - self.range_min) / reso )
         
         self._state = state + self.offset
         self.init_geometry(self._state)
@@ -75,6 +77,7 @@ class Lidar2D:
         # self._geometry = new_geometry
 
         coord = get_coordinates(new_geometry)
+
         distances = np.linalg.norm(coord[::2]- self._state[0:2, 0], axis=1)
 
     
@@ -86,28 +89,46 @@ class Lidar2D:
              point = coord[2 * index: 2 * index + 2, :]
              filtered_points.append(point)
 
+        # filter_dis = distances
 
         # filtered_points = np.array(filtered_points)
         self._geometry = MultiLineString(filtered_points)
 
-        a = 1
+        self.calculate_range()
 
 
-  
+    def calculate_range(self):
+
+        coord = get_coordinates(self._geometry)
+
+        for index, point in enumerate(coord[1::2]):
+            point = np.c_[point]
+
+            distance = np.round(np.linalg.norm(point - self._state[0:2]), 3) 
+
+            self.range_data[index] = distance
+
+        
+    def get_scan(self):
+        # reference: ros topic -- scan: http://docs.ros.org/en/melodic/api/sensor_msgs/html/msg/LaserScan.html 
+        scan_data = {}
+        scan_data['angle_min'] = self.angle_min
+        scan_data['angle_max'] = self.angle_max
+        scan_data['angle_increment'] = self.angle_inc
+        scan_data['time_increment'] = self.time_inc
+        scan_data['scan_time'] = self.scan_time
+        scan_data['range_min'] = self.range_min
+        scan_data['range_max'] = self.range_max
+        scan_data['ranges'] = self.range_data
+        scan_data['intensities'] = None
+
+        return scan_data
 
 
 
     def plot(self, ax, **kwargs):
         
         coord = get_coordinates(self._geometry)
-
-        # for i in range(0, len(coord), 2):
-            
-        #     x_value = [coord[i, 0], coord[i+1, 0]]
-        #     y_value = [coord[i, 1], coord[i+1, 1]]
-
-        #     line = ax.plot(x_value, y_value, color = self.color, alpha=self.alpha, zorder=0)
-        #     self.plot_line_list.append(line)
 
         lines = []
 

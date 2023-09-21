@@ -40,7 +40,7 @@ class ObjectBase:
     id_iter = itertools.count()
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1, sensors=None, dynamics_dict=dict(), **kwargs) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1, sensors=None, dynamics_dict=dict(), arrive_mode='state', **kwargs) -> None:
 
         '''
         parameters:
@@ -69,6 +69,8 @@ class ObjectBase:
                 dash: the object will dash to the target position, and stop when arrive the target position
                 wander: the object will wander in the world (random select goal to move)
                 default is dash
+
+            arrive_mode: position or state
 
         '''
 
@@ -100,11 +102,14 @@ class ObjectBase:
 
         # arrive judgement
         self.goal_threshold = goal_threshold
+        self.arrive_mode = arrive_mode #
 
         # sensor
         sf = SensorFactory()
         if sensors is not None: 
-            self.sensors = [sf.create_sensor(self._state, self._id, **sensor_kwargs) for sensor_kwargs in sensors] 
+            self.sensors = [sf.create_sensor(self._state[0:3], self._id, **sensor_kwargs) for sensor_kwargs in sensors] 
+
+            self.lidar = [sensor for sensor in self.sensors if sensor.sensor_type == 'lidar'][0]
         else:
             self.sensors = []
 
@@ -245,7 +250,12 @@ class ObjectBase:
 
     def check_arrive_status(self):
 
-        if np.linalg.norm(self._state[:2] - self._goal[:2]) < self.goal_threshold:
+        if self.arrive_mode == 'state':
+            diff = np.linalg.norm(self._state[:3] - self._goal[:3])
+        elif self.arrive_mode == 'position':
+            diff = np.linalg.norm(self._state[:2] - self._goal[:2])
+
+        if diff < self.goal_threshold:
             self.arrive_flag = True
         else:
             self.arrive_flag = False
@@ -335,6 +345,11 @@ class ObjectBase:
         state[2, 0] = WrapToRegion(state[2, 0], self.info.angle_range)
 
         return state
+
+
+    def get_lidar_scan(self):
+        return self.lidar.get_scan()
+
 
 
     def construct_geometry(self, shape, shape_tuple):
