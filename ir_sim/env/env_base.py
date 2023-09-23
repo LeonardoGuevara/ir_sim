@@ -224,7 +224,8 @@ class EnvBase:
     def get_current_robots(self):
         return [obj for obj in self.objects if obj.role == 'robot']
 
-
+    def get_robot_state(self):
+        return self.robot._sstate
     
     def get_lidar_scan(self, id=0):
         r_list = self.get_current_robots()
