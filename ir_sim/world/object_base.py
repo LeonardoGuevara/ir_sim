@@ -177,6 +177,16 @@ class ObjectBase:
 
                 return cls(shape='polygon', shape_tuple=[(-length/2, -width/2), (length/2, -width/2), (length/2, width/2), (-length/2, width/2)], **kwargs)
 
+        elif shape_name == 'polygon':
+
+            vertices = shape_dict.get('vertices', None)
+
+            if vertices is None:
+                raise ValueError("vertices should not be None")
+
+            return cls(shape='polygon', shape_tuple=vertices, **kwargs)
+
+
         else:
             raise NotImplementedError(f"shape {shape_name} not implemented")
 
@@ -467,7 +477,29 @@ class ObjectBase:
         self.plot_patch_list.append(arrow)
 
     def plot_trail(self, ax, **kwargs):
-        pass
+        
+        trail_type = kwargs.get('trail_type', self.shape)
+        trail_edgecolor = kwargs.get('edgecolor', 'y')
+        trail_linewidth = kwargs.get('linewidth', 0.8)
+        trail_alpha = kwargs.get('alpha', 0.8)
+
+        r_phi_ang = 180 * self._state[2, 0] / pi
+        
+
+        if trail_type == 'rectangle' or trail_type == 'polygon':
+
+            start_x = self.vertices[0, 0]
+            start_y = self.vertices[1, 0]
+
+            car_rect = mpl.patches.Rectangle(xy=(start_x, start_y), width=self.length, height=self.width, angle=r_phi_ang, edgecolor=trail_edgecolor, fill=False, alpha=trail_alpha, linewidth=trail_linewidth)
+            ax.add_patch(car_rect)
+
+        elif trail_type == 'circle':
+            
+            car_circle = mpl.patches.Circle(xy=self.centroid, radius = self.radius, edgecolor=trail_edgecolor, fill=False)
+            ax.add_patch(car_circle)
+
+             
 
     
     # if show_trail:
@@ -531,14 +563,6 @@ class ObjectBase:
 
 
 
-
-
-
-
-
-
-
-
     # get information
 
     def get_inequality_Ab(self, s):
@@ -594,7 +618,7 @@ class ObjectBase:
 
     @property
     def centroid(self):
-        return self._geometry.centroid
+        return self._geometry.centroid.coords
         
     @property
     def id(self):
