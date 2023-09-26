@@ -20,8 +20,8 @@ robot:
       - type: 'lidar2d'
         range_min: 0
         range_max: 5
-        angle_range: 3.1415926
-        number: 200
+        angle_range: 4.7123
+        number: 300
         noise: False
         std: 1   
         angle_std: 0.2
