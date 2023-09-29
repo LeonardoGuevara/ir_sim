@@ -14,10 +14,7 @@ class RobotAcker(ObjectBase):
 
         self.wheelbase = kwargs['wheelbase']
         self.info.add_property('wheelbase', self.wheelbase)
-        self.length = kwargs['length']
-        self.width = kwargs['width']
         
-
 
     def _dynamics(self, velocity, mode='steer', noise=False, alpha=[0.03, 0, 0, 0.03, 0, 0], **kwargs):
         

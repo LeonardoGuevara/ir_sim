@@ -23,6 +23,7 @@ class RobotDiff(ObjectBase):
         '''
 
         assert velocity.shape==(2, 1)
+        assert self._state.shape==(3, 1)
 
         if mode == 'diff':
             pass

@@ -104,6 +104,9 @@ class ObjectBase:
         self.color = color
         self.role = role
         self.info = ObjectInfo(self._id, shape, dynamics, role, color, static, np.c_[goal], np.c_[vel_min], np.c_[vel_max], np.c_[acce], np.c_[angle_range], goal_threshold)
+        
+        self.length = kwargs.get('length', None)
+        self.width = kwargs.get('width', None)
 
         self.trajectory = []
 
@@ -155,7 +158,7 @@ class ObjectBase:
                 length = shape_dict.get('length', 0.2)
                 width = shape_dict.get('width', 0.1)
 
-                return cls(shape='polygon', shape_tuple=[(-length/2, -width/2), (length/2, -width/2), (length/2, width/2), (-length/2, width/2)], **kwargs)
+                return cls(shape='polygon', shape_tuple=[(-length/2, -width/2), (length/2, -width/2), (length/2, width/2), (-length/2, width/2)], length=length, width=width,**kwargs)
             
             elif dynamics_name == 'acker':
 
@@ -378,7 +381,7 @@ class ObjectBase:
         if shape == 'circle':
             geometry = Point([ shape_tuple[0], shape_tuple[1] ]).buffer(shape_tuple[2])
 
-        elif shape == 'polygon':
+        elif shape == 'polygon' or 'rectangle':
             geometry = Polygon(shape_tuple)
 
         elif shape == 'linestring':
