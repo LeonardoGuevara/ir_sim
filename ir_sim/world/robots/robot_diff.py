@@ -21,7 +21,7 @@ class RobotDiff(ObjectBase):
         velocity: [linear, angular]  (2*1) vector
         mode: 'diff', 'omni', 'wheel', 
         '''
-
+        
         assert velocity.shape==(2, 1)
         assert self._state.shape==(3, 1)
 
