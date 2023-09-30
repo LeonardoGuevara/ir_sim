@@ -436,7 +436,6 @@ class ObjectBase:
             object_patch.set_zorder(3)
 
         elif self.shape == 'polygon':
-
             object_patch = mpl.patches.Polygon(xy=self.vertices.T, color=self.color)
 
         ax.add_patch(object_patch)
