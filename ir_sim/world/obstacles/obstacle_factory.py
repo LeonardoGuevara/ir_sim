@@ -5,7 +5,10 @@ from ir_sim.world.obstacles.obstacle_static import ObstacleStatic
 
 class ObstacleFactory:
 
-    def create_obstacle(self, dynamics_name, dynamics_dict=dict(),  shape=dict(), **kwargs):
+    def create_obstacle(self, dynamics_dict, shape=dict(), **kwargs):
+        
+        dynamics_name = dynamics_dict.pop('name', 'diff')
+        # dynamics_name, dynamics_dict=dict(),  
 
         if dynamics_name == 'diff':
             return ObstacleDiff.create_with_shape(dynamics_name, shape, dynamics_dict=dynamics_dict, **kwargs)

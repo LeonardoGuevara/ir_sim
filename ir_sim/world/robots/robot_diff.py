@@ -25,6 +25,8 @@ class RobotDiff(ObjectBase):
         assert velocity.shape==(2, 1)
         assert self._state.shape==(3, 1)
 
+        # cur_state = self._state[0:3]
+
         if mode == 'diff':
             pass
         elif mode == 'omni':

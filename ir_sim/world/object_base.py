@@ -126,8 +126,12 @@ class ObjectBase:
         # behavior
         self.obj_behavior = Behavior(self.info, behavior)
 
+        if self.obj_behavior.behavior_dict is not None and self.obj_behavior.behavior_dict['name'] == 'wander':
+            range_low = np.c_[self.obj_behavior.behavior_dict['range_low']]
+            range_high = np.c_[self.obj_behavior.behavior_dict['range_high']]
 
-
+            self._goal = np.random.uniform(range_low, range_high)
+        
         # plot 
         self.plot_patch_list = []
         self.plot_line_list = []
@@ -189,6 +193,15 @@ class ObjectBase:
 
             return cls(shape='polygon', shape_tuple=vertices, **kwargs)
 
+        elif shape_name == 'linestring':
+
+            vertices = shape_dict.get('vertices', None)
+
+            if vertices is None:
+                raise ValueError("vertices should not be None")
+            
+            return cls(shape='linestring', shape_tuple=vertices, **kwargs)
+
 
         else:
             raise NotImplementedError(f"shape {shape_name} not implemented")
@@ -239,7 +252,7 @@ class ObjectBase:
 
     def geometry_transform(self, geometry, state):
 
-        def transfor_with_state(x, y):
+        def transform_with_state(x, y):
 
             trans, rot = get_transform(state)
 
@@ -250,7 +263,7 @@ class ObjectBase:
 
             return (new_points[0, :], new_points[1, :])
         
-        new_geometry = transform(transfor_with_state, geometry)
+        new_geometry = transform(transform_with_state, geometry)
 
         return new_geometry
 
@@ -310,6 +323,16 @@ class ObjectBase:
                 return np.zeros_like(self._velocity)
 
             else:
+                
+                if self.obj_behavior.behavior_dict['name'] == 'wander':
+                    
+                    if self.arrive_flag:
+                        range_low = np.c_[self.obj_behavior.behavior_dict['range_low']]
+                        range_high = np.c_[self.obj_behavior.behavior_dict['range_high']]
+
+                        self._goal = np.random.uniform(range_low, range_high)
+                        self.arrive_flag = False
+
                 behavior_vel = self.obj_behavior.gen_vel(self._state, self._goal, min_vel, max_vel)
             
         else:
@@ -558,11 +581,7 @@ class ObjectBase:
         
 
 
-        
-
-
-
-
+    
 
 
     # get information
@@ -620,7 +639,7 @@ class ObjectBase:
 
     @property
     def centroid(self):
-        return self._geometry.centroid.coords
+        return self._geometry.centroid.coords._coords.T
         
     @property
     def id(self):

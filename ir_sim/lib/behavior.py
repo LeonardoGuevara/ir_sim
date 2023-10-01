@@ -26,6 +26,14 @@ class Behavior:
 
                 behavior_vel = DiffDash(state, goal, max_vel, angle_tolerance, goal_threshold)
 
+            elif self.behavior_dict['name'] == 'wander':
+                
+                angle_tolerance = self.behavior_dict.get('angle_tolerance', 0.1)
+                goal_threshold = self.object_info.goal_threshold
+
+                behavior_vel = DiffDash(state, goal, max_vel, angle_tolerance, goal_threshold)
+
+            
         elif self.object_info.dynamics == 'acker':
 
             if self.behavior_dict['name'] == 'dash':
@@ -35,7 +43,10 @@ class Behavior:
 
                 behavior_vel = AckerDash(state, goal, max_vel, angle_tolerance, goal_threshold)
 
+        elif self.object_info.dynamics == 'omni':
+            pass
             
+                
         return behavior_vel
 
 

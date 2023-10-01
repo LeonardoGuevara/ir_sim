@@ -106,13 +106,24 @@ class EnvBase:
         pass
     
     # step
-    def step(self, action=None, **kwargs):
-        self.objects_step(action)
+    def step(self, action=None, action_id=0, **kwargs):
+
+        if isinstance(action, list):
+            self.objects_step(action)
+        else:
+            self.object_step(action, action_id)
+
+        # if action is None:
+        #     action = [None] * len(self.objects)
         self.world.step()
 
     def objects_step(self, action=None):
-        [ obj.step(action) for obj in self.objects]
+        action = action + [None] * (len(self.objects) - len(action))
+        [ obj.step(action) for obj, action in zip(self.objects, action)]
 
+    def object_step(self, action, obj_id=0):
+        self.objects[obj_id].step(action)
+        [ obj.step() for obj in self.objects if obj._id != obj_id]
 
         
     def render(self, interval=0.05, **kwargs):
