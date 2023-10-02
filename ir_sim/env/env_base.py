@@ -13,7 +13,7 @@ from ir_sim.world.obstacles.obstacle_factory import ObstacleFactory
 from matplotlib import pyplot as plt
 from ir_sim.world.robots.multi_robots import MultiRobots
 from ir_sim.world.obstacles.multi_obstacles import MultiObstacles
-
+import platform
 
 
 class EnvBase:
@@ -27,7 +27,7 @@ class EnvBase:
     
     '''
 
-    def __init__(self, world_name=None, display=True, disable_all_plot=False, save_ani=False, **kwargs):
+    def __init__(self, world_name=None, display=True, disable_all_plot=False, save_ani=False, full=False, **kwargs):
 
         world_file_path = file_check(world_name)
         
@@ -87,6 +87,18 @@ class EnvBase:
         self.save_ani = save_ani
 
         env_param.objects = self.objects
+
+        if full:
+            mode = platform.system()
+            if mode == 'Linux':
+                # mng = plt.get_current_fig_manager()
+                plt.get_current_fig_manager().full_screen_toggle()
+                # mng.resize(*mng.window.maxsize())
+                # mng.frame.Maximize(True)
+
+            elif mode == 'Windows':
+                figManager = plt.get_current_fig_manager()
+                figManager.window.showMaximized()
 
         # # thread
         # self.step_thread = threading.Thread(target=self.step)

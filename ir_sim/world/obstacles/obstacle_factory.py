@@ -7,7 +7,10 @@ class ObstacleFactory:
 
     def create_obstacle(self, dynamics_dict, shape=dict(), **kwargs):
         
-        dynamics_name = dynamics_dict.pop('name', 'diff')
+        if dynamics_dict is not None:
+            dynamics_name = dynamics_dict.pop('name', 'diff')
+        else:
+            dynamics_name = None
         # dynamics_name, dynamics_dict=dict(),  
 
         if dynamics_name == 'diff':
