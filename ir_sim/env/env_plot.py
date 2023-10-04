@@ -139,17 +139,17 @@ class EnvPlot:
         self.fig.savefig(fp+'/'+order+'.'+format, format=format, **self.saved_figure_kwargs)
 
 
-    def save_animate(self, **kwargs):
+    def save_animate(self, ani_name='animation', suffix='.gif', keep_len=30, rm_fig_path=True, **kwargs):
         
         # saved_ani_kwargs: arguments for animations(gif): see https://imageio.readthedocs.io/en/v2.8.0/format_gif-pil.html#gif-pil for detail
 
         self.saved_ani_kwargs.update({'subrectangles': True})
         self.saved_ani_kwargs.update(kwargs)
 
-        ani_name = self.saved_ani_kwargs.get('ani_name', 'animation')
-        suffix = self.saved_ani_kwargs.get('suffix', '.gif')
-        keep_len = self.saved_ani_kwargs.get('keep_len', 30)
-        rm_fig_path = self.saved_ani_kwargs.get('rm_fig_path', True)
+        # ani_name = self.saved_ani_kwargs.get('ani_name', 'animation')
+        # suffix = self.saved_ani_kwargs.get('suffix', '.gif')
+        # keep_len = self.saved_ani_kwargs.get('keep_len', 30)
+        # rm_fig_path = self.saved_ani_kwargs.get('rm_fig_path', True)
 
         print('Start to create animation')
 
