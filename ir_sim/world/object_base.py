@@ -189,6 +189,10 @@ class ObjectBase:
             vertices = shape_dict.get('vertices', None)
 
             if vertices is None:
+
+                
+
+
                 raise ValueError("vertices should not be None")
 
             return cls(shape='polygon', shape_tuple=vertices, **kwargs)
@@ -201,8 +205,7 @@ class ObjectBase:
                 raise ValueError("vertices should not be None")
             
             return cls(shape='linestring', shape_tuple=vertices, **kwargs)
-
-
+        
         else:
             raise NotImplementedError(f"shape {shape_name} not implemented")
 
@@ -540,10 +543,6 @@ class ObjectBase:
     #             ax.add_patch(car_circle)
 
 
-
-
-
-
     def plot_uncertainty(self, ax, **kwargs):
         pass
 
@@ -676,6 +675,13 @@ class ObjectBase:
         # 2*N
         return self._geometry.exterior.coords._coords.T
 
+
+    @staticmethod
+    def generate_polygon_vertices(center: Tuple[float, float], avg_radius: float,
+                     irregularity: float, spikiness: float,
+                     num_vertices: int):
+        
+        
 
 
 

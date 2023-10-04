@@ -18,7 +18,7 @@ class ObstacleFactory:
             pass
         else:
             return ObstacleStatic.create_with_shape(dynamics_name, shape, dynamics_dict=dynamics_dict, **kwargs)
-            
+             
 
     def create_obstacle_single(self, dynamics=None, shape=dict(), **kwargs):
 
