@@ -676,12 +676,12 @@ class ObjectBase:
         return self._geometry.exterior.coords._coords.T
 
 
-    @staticmethod
-    def generate_polygon_vertices(center: Tuple[float, float], avg_radius: float,
-                     irregularity: float, spikiness: float,
-                     num_vertices: int):
+    # @staticmethod
+    # def generate_polygon_vertices(center: Tuple[float, float], avg_radius: float,
+    #                  irregularity: float, spikiness: float,
+    #                  num_vertices: int):
         
-        
+    #     pass
 
 
 
