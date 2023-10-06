@@ -166,9 +166,9 @@ class ObjectBase:
             
             elif dynamics_name == 'acker':
 
-                length = kwargs.get('length', 4.6)
-                width = kwargs.get('width', 1.6)
-                wheelbase = kwargs.get('wheelbase', 3)
+                length = shape_dict.get('length', 4.6)
+                width = shape_dict.get('width', 1.6)
+                wheelbase = shape_dict.get('wheelbase', 3)
 
                 start_x = - (length - wheelbase)/2
                 start_y = - width/2
