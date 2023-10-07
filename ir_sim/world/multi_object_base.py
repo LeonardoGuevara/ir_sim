@@ -75,6 +75,9 @@ class MultiObjects:
 
         for obj in self.object_list:
             obj.plot(ax, **kwargs)
+
+
+            
     # def set_attributes(self, **kwargs):
         
     #     states_kwargs = kwargs.get('states', dict())
