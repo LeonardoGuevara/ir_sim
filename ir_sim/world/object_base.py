@@ -189,10 +189,6 @@ class ObjectBase:
             vertices = shape_dict.get('vertices', None)
 
             if vertices is None:
-
-                
-
-
                 raise ValueError("vertices should not be None")
 
             return cls(shape='polygon', shape_tuple=vertices, **kwargs)
@@ -576,11 +572,12 @@ class ObjectBase:
         self.stop_flag = False
         self.trajectory = []
 
-        
-        
 
 
-    
+    # generate random polygon
+    @staticmethod
+    def random_generate_polygons(number, avg_radius, irregularity, spikiness, num_vertices):   
+        pass
 
 
     # get information

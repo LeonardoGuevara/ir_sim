@@ -98,8 +98,8 @@ class EnvBase:
 
             elif mode == 'Windows':
                 figManager = plt.get_current_fig_manager()
-                figManager.window.showMaximized()
-
+                # figManager.window.showMaximized()
+                figManager.resize(*figManager.window.maxsize())
         # # thread
         # self.step_thread = threading.Thread(target=self.step)
     
@@ -138,7 +138,7 @@ class EnvBase:
         [ obj.step() for obj in self.objects if obj._id != obj_id]
 
         
-    def render(self, interval=0.05, **kwargs):
+    def render(self, interval=0.05, figure_kwargs=dict(), **kwargs):
 
         # figure_args: arguments when saving the figures for animation, see https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.savefig.html for detail
         # default figure arguments
@@ -148,7 +148,7 @@ class EnvBase:
 
                 if self.display: plt.pause(interval)
 
-                if self.save_ani: self.env_plot.save_gif_figure(**kwargs)
+                if self.save_ani: self.env_plot.save_gif_figure(**figure_kwargs)
 
                 self.env_plot.clear_components('dynamic', self.objects, **kwargs)
                 self.env_plot.draw_components('dynamic', self.objects, **kwargs)
