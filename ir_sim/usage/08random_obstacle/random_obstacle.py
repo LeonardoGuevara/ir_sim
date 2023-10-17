@@ -1,6 +1,6 @@
 from ir_sim.env import EnvBase
 
-env = EnvBase('random_obstacle.yaml', save_ani=False, rm_fig_path=False, full=True)
+env = EnvBase('random_obstacle.yaml', save_ani=False, rm_fig_path=False, full=False)
 
 for i in range(300):
 
