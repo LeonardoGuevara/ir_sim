@@ -13,6 +13,7 @@ import matplotlib as mpl
 from shapely.ops import transform
 import shapely
 from ir_sim.world.sensors.sensor_factory import SensorFactory
+from ir_sim.lib.generation import random_generate_polygon
 
 @dataclass
 class ObjectInfo:
@@ -186,10 +187,13 @@ class ObjectBase:
 
         elif shape_name == 'polygon':
 
-            vertices = shape_dict.get('vertices', None)
+            if shape_dict.get('random_shape', False):
+                vertices = random_generate_polygon(**shape_dict)
+            else:
+                vertices = shape_dict.get('vertices', None)
 
             if vertices is None:
-                raise ValueError("vertices should not be None")
+                raise ValueError("vertices are not set")
 
             return cls(shape='polygon', shape_tuple=vertices, **kwargs)
 

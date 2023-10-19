@@ -38,38 +38,38 @@ class MultiObjects:
     def generate_state_shape(self, distribution_dict, **kwargs):
 
 
+        
         if distribution_dict is None:
             # default
             state_list = kwargs['states']
-            shape_list = kwargs['shapes']
-
+            
         elif distribution_dict['mode'] == 'manual':
-
             # state_list = kwargs['states']
             state_list = kwargs.get('states', [[0, 0, 0]] * self.number)
-            shape_list = kwargs['shapes']
+
 
         elif distribution_dict['mode'] == 'random':
-            
             state_list = kwargs['states']
-            shape_list = kwargs['shapes']
 
 
-        if distribution_dict.get('random_shape', False):
+        shape_list = kwargs['shapes']
+
+
+        # if distribution_dict.get('random_shape', False):
             
-            temp_shape_list = kwargs['shapes']
-            shape_list = []
+        #     temp_shape_list = kwargs['shapes']
+        #     shape_list = []
 
-            for shape_dict in temp_shape_list:
+        #     for shape_dict in temp_shape_list:
                 
-                if shape_dict['name'] == 'polygon':
+        #         if shape_dict['name'] == 'polygon':
                     
-                    shape_number = shape_dict.get('random_number', 1)
-                    vertices_list = self.random_generate_polygon(shape_number, **distribution_dict)
+        #             shape_number = shape_dict.get('random_number', self.number)
+        #             vertices_list = self.random_generate_polygon(shape_number, **distribution_dict)
 
-                    # poly_shape_list = extend_list([shape_dict], self.number)
-                    poly_shape_list = [ {'name': 'polygon', 'vertices': vertices_list[i]}  for i in range(self.number) ]
-                    shape_list += poly_shape_list
+        #             # poly_shape_list = extend_list([shape_dict], self.number)
+        #             poly_shape_list = [ {'name': 'polygon', 'vertices': vertices_list[i]}  for i in range(shape_number) ]
+        #             shape_list += poly_shape_list
 
         if distribution_dict.get('random_bear', False):
             pass

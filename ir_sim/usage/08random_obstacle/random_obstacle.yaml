@@ -30,10 +30,9 @@ robot:
 
 obstacles:
   - number: 10
-    distribution: {mode: 'manual', random_shape: true, center_range: [5, 10, 40, 30], avg_radius_range: [0.5, 2]}
+    distribution: {mode: 'manual'}
     shapes:
-      - {name: 'polygon', random_number: 10}  # radius
-
+      - {name: 'polygon', random_shape: true, center_range: [5, 10, 40, 30], avg_radius_range: [0.5, 2]}  # radius
 
   # - shape: {name: 'circle', radius: 0.4}  # radius
   #   state: [1, 1, 0] 

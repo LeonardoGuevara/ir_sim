@@ -3,6 +3,27 @@ from typing import List, Tuple
 from PIL import Image, ImageDraw
 import numpy as np
 
+
+def random_generate_polygon(number=1, center_range=[0, 0, 10, 10], avg_radius_range=[0.1, 1], irregularity_range=[0, 1], spikiness_range=[0, 1], num_vertices_range=[4, 10], **kwargs):
+
+    ''' 
+    2d range: min_x, min_y, max_x, max_y
+    '''
+    
+    center = np.random.uniform(low=center_range[0:2], high=center_range[2:], size=(number, 2))
+    avg_radius = np.random.uniform(low=avg_radius_range[0], high=avg_radius_range[1], size=(number,))
+    irregularity = np.random.uniform(low=irregularity_range[0], high=irregularity_range[1], size=(number,))
+    spikiness = np.random.uniform(low=spikiness_range[0], high=spikiness_range[1], size=(number,))
+    num_vertices = np.random.randint(low=num_vertices_range[0], high=num_vertices_range[1], size=(number,))
+
+    vertices_list = [generate_polygon(center[i, :], avg_radius[i], irregularity[i], spikiness[i], num_vertices[i]) for i in range(number)]
+    
+    if number == 1:
+        return vertices_list[0]
+
+    return vertices_list
+
+
 def generate_polygon(center, avg_radius, irregularity, spikiness, num_vertices):
 
     # reference: https://stackoverflow.com/questions/8997099/algorithm-to-generate-random-2d-polygon
