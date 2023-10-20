@@ -36,6 +36,7 @@ class EnvPlot:
         self.disable_all_plot = disable_all_plot
 
         self.dyna_line_list = []
+        self.dyna_point_list = []
 
 
     def init_plot(self, grid_map, objects, no_axis=False):
@@ -71,15 +72,17 @@ class EnvPlot:
         if mode == 'dynamic':
             [obj.plot_clear() for obj in objects if not obj.static]
             [line.pop(0).remove() for line in self.dyna_line_list]
+            [points.remove() for points in self.dyna_point_list]
 
             self.dyna_line_list = []
+            self.dyna_point_list = []
 
         elif mode == 'static':
             pass
 
         elif mode == 'all':
             plt.cla()
-        
+    
 
     def draw_grid_map(self, grid_map=None, **kwargs):
         
@@ -121,6 +124,20 @@ class EnvPlot:
 
         if refresh and not self.disable_all_plot: 
             self.dyna_line_list.append(line)
+
+
+    def draw_points(self, point_list, s=0.1, c='b', refresh=True, **kwargs):
+
+        if point_list is not None:
+
+            x_coordinates = [point[0] for point in point_list]
+            y_coordinates = [point[1] for point in point_list]
+
+            points = self.ax.scatter(x_coordinates, y_coordinates, s, c, **kwargs)
+
+            if refresh: self.dyna_point_list.append(points)
+
+
 
     # save animation and figure 
     def save_gif_figure(self, format='png', **kwargs):

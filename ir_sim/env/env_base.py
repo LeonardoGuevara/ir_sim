@@ -169,6 +169,16 @@ class EnvBase:
     def show(self):
         self.env_plot.show()
 
+    # def clear(self):
+    #     pass
+
+    # def init_plot(self, **kwargs):
+    #     pass
+
+    def reset_plot(self):
+        plt.cla()
+        self.env_plot.init_plot(self.world.grid_map, self.objects)
+
 
     def init_keyboard(self, keyboard_kwargs=dict()):
 
@@ -199,6 +209,8 @@ class EnvBase:
     def draw_trajectory(self, traj, traj_type='g-', **kwargs):
         self.env_plot.draw_trajectory(traj, traj_type, **kwargs)
 
+    def draw_points(self, points, s=10, c='b', **kwargs):
+        self.env_plot.draw_points(points, s, c, **kwargs)
 
 
     def end(self, ending_time=1, **kwargs):
@@ -334,9 +346,7 @@ class EnvBase:
                     else:
                         print('current control id: ', int(key.char))
                         self.key_id = int(key.char)
-
-
-    # region: keyboard control           
+        
     def on_release(self, key):
         
         try:
