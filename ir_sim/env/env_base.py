@@ -14,7 +14,8 @@ from matplotlib import pyplot as plt
 from ir_sim.world.robots.multi_robots import MultiRobots
 from ir_sim.world.obstacles.multi_obstacles import MultiObstacles
 import platform
-
+import numpy as np
+from pynput import keyboard
 
 class EnvBase:
 
@@ -31,7 +32,7 @@ class EnvBase:
 
         world_file_path = file_check(world_name)
         
-        world_kwargs, plot_kwargs, robot_kwargs_list, robots_kwargs_list, obstacle_kwargs_list, obstacles_kwargs  = dict(), dict(), [], [], [], []
+        world_kwargs, plot_kwargs, robot_kwargs_list, robots_kwargs_list, obstacle_kwargs_list, obstacles_kwargs_list  = dict(), dict(), [], [], [], []
 
         if world_file_path != None:
            
@@ -39,6 +40,7 @@ class EnvBase:
                 com_list = yaml.load(file, Loader=yaml.FullLoader)
                 world_kwargs = com_list.get('world', dict())
                 plot_kwargs = com_list.get('plot', dict())
+                keyboard_kwargs = com_list.get('keyboard', dict())
                 robot_kwargs_list = com_list.get('robot', list())
                 robots_kwargs_list = com_list.get('robots', list())
                 obstacle_kwargs_list = com_list.get('obstacle', list())
@@ -80,6 +82,10 @@ class EnvBase:
 
         self.env_plot = EnvPlot(self.world.grid_map, self.objects, self.world.x_range, self.world.y_range, **plot_kwargs)
 
+        self.robot_number = len(self.robot_list + robots_sum_list)
+        self.obstacle_number = len(self.obstacle_list + obstacles_sum_list)
+
+
         # set env param
         self.display = display
         self.disable_all_plot = disable_all_plot
@@ -87,6 +93,9 @@ class EnvBase:
         self.save_ani = save_ani
 
         env_param.objects = self.objects
+
+        if world_param.control_mode == 'keyboard':
+            self.init_keyboard(keyboard_kwargs)
 
         if full:
             mode = platform.system()
@@ -123,7 +132,10 @@ class EnvBase:
         if isinstance(action, list):
             self.objects_step(action)
         else:
-            self.object_step(action, action_id)
+            if world_param.control_mode == 'keyboard': 
+                self.object_step(self.key_vel, self.key_id)
+            else:
+                self.object_step(action, action_id)
 
         # if action is None:
         #     action = [None] * len(self.objects)
@@ -156,6 +168,32 @@ class EnvBase:
 
     def show(self):
         self.env_plot.show()
+
+
+    def init_keyboard(self, keyboard_kwargs=dict()):
+
+        vel_max = keyboard_kwargs.get('vel_max', [3.0, 1.0])
+        self.key_lv_max = keyboard_kwargs.get("key_lv_max", vel_max[0])
+        self.key_ang_max = keyboard_kwargs.get("key_ang_max", vel_max[1])
+        self.key_lv = keyboard_kwargs.get("key_lv", 0.0)
+        self.key_ang = keyboard_kwargs.get("key_ang", 0.0)
+        self.key_id = keyboard_kwargs.get("key_id", 0)
+        self.alt_flag = 0
+
+        plt.rcParams['keymap.save'].remove('s')
+        plt.rcParams['keymap.quit'].remove('q')
+        
+        self.key_vel = np.zeros((2, 1))
+
+        print('start to keyboard control')
+        print('w: forward', 's: backforward', 'a: turn left', 'd: turn right', 
+                'q: decrease linear velocity', 'e: increase linear velocity',
+                'z: decrease angular velocity', 'c: increase angular velocity',
+                'alt+num: change current control robot id', 'r: reset the environment')
+                
+        self.listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release)
+        self.listener.start()
+
 
 
     def draw_trajectory(self, traj, traj_type='g-', **kwargs):
@@ -256,6 +294,83 @@ class EnvBase:
         return r_list[id].get_lidar_scan()
 
 
+    # region: keyboard control
+    def on_press(self, key):
+
+        try:
+            if key.char.isdigit() and self.alt_flag:
+
+                if int(key.char) >= self.robot_number:
+                    print('out of number of robots')
+                    self.key_id = int(key.char)
+                else:
+                    print('current control id: ', int(key.char))
+                    self.key_id = int(key.char)
+
+            if key.char == 'w':
+                self.key_lv = self.key_lv_max
+            if key.char == 's':
+                self.key_lv = - self.key_lv_max
+            if key.char == 'a':
+                self.key_ang = self.key_ang_max
+            if key.char == 'd':
+                self.key_ang = -self.key_ang_max
+            
+            self.key_vel = np.array([ [self.key_lv], [self.key_ang]])
+
+        except AttributeError:
+            
+            try:
+                if "alt" in key.name:
+                    self.alt_flag = True
+
+            except AttributeError:
+
+                if key.char.isdigit() and self.alt_flag:
+
+                    if int(key.char) >= self.robot_number:
+                        print('out of number of robots')
+                        self.key_id = int(key.char)
+                    else:
+                        print('current control id: ', int(key.char))
+                        self.key_id = int(key.char)
+
+
+    # region: keyboard control           
+    def on_release(self, key):
+        
+        try:
+            if key.char == 'w':
+                self.key_lv = 0
+            if key.char == 's':
+                self.key_lv = 0
+            if key.char == 'a':
+                self.key_ang = 0
+            if key.char == 'd':
+                self.key_ang = 0
+            if key.char == 'q':
+                self.key_lv_max = self.key_lv_max - 0.2
+                print('current lv ', self.key_lv_max)
+            if key.char == 'e':
+                self.key_lv_max = self.key_lv_max + 0.2
+                print('current lv ', self.key_lv_max)
+            
+            if key.char == 'z':
+                self.key_ang_max = self.key_ang_max - 0.2
+                print('current ang ', self.key_ang_max)
+            if key.char == 'c':
+                self.key_ang_max = self.key_ang_max + 0.2
+                print('current ang ', self.key_ang_max)
+            
+            if key.char == 'r':
+                self.reset()
+            
+            self.key_vel = np.array([[self.key_lv], [self.key_ang]])
+
+        except AttributeError:
+            if "alt" in key.name:
+                self.alt_flag = False
+    # endregion:keyboard control
         
 
     
