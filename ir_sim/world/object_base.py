@@ -666,6 +666,10 @@ class ObjectBase:
     @property
     def arrive(self):
         return self.arrive_flag
+    
+    @property
+    def collision(self):
+        return self.collision_flag
 
     @property
     def ineq_Ab(self):

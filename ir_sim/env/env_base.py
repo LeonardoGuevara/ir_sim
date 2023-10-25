@@ -294,6 +294,15 @@ class EnvBase:
 
         return robot_list[0]
 
+    @property
+    def arrive(self):
+        return self.robot.arrive
+    
+    @property
+    def collision(self):
+        return self.robot.collision
+
+
     def get_current_robots(self):
         return [obj for obj in self.objects if obj.role == 'robot']
 
@@ -305,6 +314,7 @@ class EnvBase:
 
         return r_list[id].get_lidar_scan()
 
+    
 
     # region: keyboard control
     def on_press(self, key):
