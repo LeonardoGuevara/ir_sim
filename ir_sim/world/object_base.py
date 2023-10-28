@@ -349,9 +349,9 @@ class ObjectBase:
         # input_kwargs = {'state': self._state, 'goal': self._goal, 'min_vel': min_vel, 'max_vel': max_vel}
 
         if (behavior_vel < min_vel).any():
-            logging.warning("velocity is smaller than min_vel, velocity is clipped to min_vel")
+            logging.warning("input velocity {} is smaller than min_vel {}, velocity is clipped".format(behavior_vel.flatten(), min_vel.flatten()))
         elif (behavior_vel > max_vel).any():
-            logging.warning("velocity is larger than max_vel, velocity is clipped to max_vel")
+            logging.warning("input velocity {} is larger than max_vel {}, velocity is clipped".format(behavior_vel.flatten(), max_vel.flatten()))
 
         behavior_vel_clip = np.clip(behavior_vel, min_vel, max_vel)
 
