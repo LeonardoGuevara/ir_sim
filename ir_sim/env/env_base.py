@@ -313,6 +313,15 @@ class EnvBase:
         r_list = self.get_current_robots()
 
         return r_list[id].get_lidar_scan()
+    
+    def get_lidar_points(self, id=0):
+
+        r_list = self.get_current_robots()
+        
+        return r_list[id].get_lidar_points()
+
+        
+
 
     
 
@@ -391,7 +400,7 @@ class EnvBase:
             if "alt" in key.name:
                 self.alt_flag = False
     # endregion:keyboard control
-        
+    
 
     
 

@@ -1,7 +1,7 @@
 from math import pi, cos, sin
 import numpy as np
 from shapely import MultiLineString, GeometryCollection
-from ir_sim.util.util import geometry_transform
+from ir_sim.util.util import geometry_transform, get_transform
 from ir_sim.global_param import env_param
 from shapely import get_coordinates
 from matplotlib.collections import LineCollection
@@ -125,6 +125,9 @@ class Lidar2D:
         return scan_data
 
 
+    def get_points(self):
+        return self.scan_to_pointcloud()
+
 
     def plot(self, ax, **kwargs):
         
@@ -157,4 +160,33 @@ class Lidar2D:
         self.plot_line_list = []
         self.plot_text_list = []
         
+    
+    
+    def scan_to_pointcloud(self):
+        '''
+        return poit cloud: (2, n)
+        '''
+
+        point_cloud = []
+
+        ranges = self.range_data
+        angles = np.linspace(self.angle_min, self.angle_max, len(ranges))    
+
+        # trans, R = get_transform(self._state)
+    
+        for i in range(len(ranges)):
+            scan_range = ranges[i]
+            angle = angles[i]
+
+            if scan_range < (self.range_max - 0.02):
+                point = np.array([ [scan_range * cos(angle)], [scan_range * sin(angle)]  ])
+                point_cloud.append(point)
+
+        if len(point_cloud) == 0:
+            return None
         
+        point_array = np.hstack(point_cloud)
+
+        # point_coords = R @ point_array + trans
+
+        return point_array
