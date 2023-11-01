@@ -427,7 +427,7 @@ class ObjectBase:
         pass
     
     
-    def plot(self, ax, show_goal=False, show_text=False, show_arrow=False, show_uncertainty=False, show_trajectory=False, show_trail=False, show_sensor=True, **kwargs):
+    def plot(self, ax, show_goal=False, show_text=False, show_arrow=False, show_uncertainty=False, show_trajectory=False, show_trail=False, show_sensor=True, trail_freq=1, **kwargs):
 
         # object_color = 'g', goal_color='r', show_goal=True, show_text=False, show_traj=False, traj_type='-g', fontsize=10, 
 
@@ -448,7 +448,7 @@ class ObjectBase:
         if show_trajectory:
             self.plot_trajectory(ax, **kwargs)
         
-        if show_trail:
+        if show_trail and world_param.count % trail_freq == 0:
             self.plot_trail(ax, **kwargs)
 
         if show_sensor:
@@ -467,6 +467,7 @@ class ObjectBase:
 
         elif self.shape == 'polygon':
             object_patch = mpl.patches.Polygon(xy=self.vertices.T, color=self.color)
+            object_patch.set_zorder(3)
 
         ax.add_patch(object_patch)
         self.plot_patch_list.append(object_patch)

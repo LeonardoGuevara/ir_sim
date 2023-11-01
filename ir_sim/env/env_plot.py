@@ -126,7 +126,7 @@ class EnvPlot:
             self.dyna_line_list.append(line)
 
 
-    def draw_points(self, point_list, s=0.1, c='b', refresh=True, **kwargs):
+    def draw_points(self, point_list, s=10, c='m', refresh=True, **kwargs):
 
         if point_list is not None:
 
@@ -190,7 +190,7 @@ class EnvPlot:
 
         imageio.mimsave(ap +'/'+ ani_name + suffix, image_list, **self.saved_ani_kwargs)
         print('Create animation successfully, the animation file is saved in the path ' + ap)
-
+ 
         if rm_fig_path: shutil.rmtree(fp)
 
         
