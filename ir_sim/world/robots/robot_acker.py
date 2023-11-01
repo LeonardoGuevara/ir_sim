@@ -49,7 +49,7 @@ class RobotAcker(ObjectBase):
         super().plot(ax, show_goal=show_goal, show_arrow = show_arrow, **kwargs)
 
 
-    def plot_object(self, ax):
+    def plot_object(self, ax, **kwargs):
         
         # x = self.vertices[0, 0]
         # y = self.vertices[1, 0]

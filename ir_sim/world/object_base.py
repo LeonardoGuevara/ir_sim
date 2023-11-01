@@ -514,7 +514,7 @@ class ObjectBase:
         trail_type = kwargs.get('trail_type', self.shape)
         trail_edgecolor = kwargs.get('edgecolor', 'y')
         trail_linewidth = kwargs.get('linewidth', 0.8)
-        trail_alpha = kwargs.get('alpha', 0.8)
+        trail_alpha = kwargs.get('trail_alpha', 0.8)
 
         r_phi_ang = 180 * self._state[2, 0] / pi
         
