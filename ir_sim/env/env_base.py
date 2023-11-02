@@ -213,6 +213,10 @@ class EnvBase:
         self.env_plot.draw_points(points, s, c, **kwargs)
 
 
+    def draw_box(self, vertex, refresh=True, **kwargs):
+        self.env_plot.draw_box(vertex, refresh, **kwargs)
+
+
     def end(self, ending_time=1, **kwargs):
 
         if self.save_ani:
@@ -242,6 +246,12 @@ class EnvBase:
     def reset_all(self):
         [obj.reset() for obj in self.objects]
         
+
+
+    def get_robot_info(self, id=0):
+        return self.robot_list[id].get_info()
+
+
 
     #     def reset(self, mode='now', **kwargs):
     #     # mode: 
