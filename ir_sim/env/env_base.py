@@ -209,7 +209,7 @@ class EnvBase:
     def draw_trajectory(self, traj, traj_type='g-', **kwargs):
         self.env_plot.draw_trajectory(traj, traj_type, **kwargs)
 
-    def draw_points(self, points, s=5, c='m', **kwargs):
+    def draw_points(self, points, s=30, c='b', **kwargs):
         self.env_plot.draw_points(points, s, c, **kwargs)
 
 
