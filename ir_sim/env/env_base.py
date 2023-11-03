@@ -106,9 +106,12 @@ class EnvBase:
                 # mng.frame.Maximize(True)
 
             elif mode == 'Windows':
-                figManager = plt.get_current_fig_manager()
+                # figManager = plt.get_current_fig_manager()
                 # figManager.window.showMaximized()
-                figManager.resize(*figManager.window.maxsize())
+                # figManager.resize(*figManager.window.maxsize())
+                # self.env_plot.fig.canvas.manager.window.showMaximized()
+                mng = plt.get_current_fig_manager()
+                mng.full_screen_toggle()
         # # thread
         # self.step_thread = threading.Thread(target=self.step)
     

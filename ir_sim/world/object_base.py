@@ -41,7 +41,7 @@ class ObjectBase:
     id_iter = itertools.count()
     vel_dim = (2, 1)
 
-    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1, sensors=None, dynamics_dict=dict(), arrive_mode='state', **kwargs) -> None:
+    def __init__(self, shape: str='circle', shape_tuple=None, state=[0, 0, 0], velocity=[0, 0], goal=[10, 10, 0], dynamics: str='omni', role: str='obstacle', color='k', static=False, vel_min=[-1, -1], vel_max=[1, 1], acce=[inf, inf], angle_range=[-pi, pi], behavior=None, goal_threshold=0.1, sensors=None, dynamics_dict=dict(), arrive_mode='state', description=None, **kwargs) -> None:
 
         '''
         parameters:
@@ -110,6 +110,8 @@ class ObjectBase:
         self.width = kwargs.get('width', None)
 
         self.trajectory = []
+
+        self.description = description
 
         # arrive judgement
         self.goal_threshold = goal_threshold
@@ -457,21 +459,31 @@ class ObjectBase:
         
     def plot_object(self, ax, **kwargs):
 
-        x = self.state[0, 0]
-        y = self.state[1, 0]
+        if self.description is None:
 
-        if self.shape == 'circle':
+            x = self.state[0, 0]
+            y = self.state[1, 0]
 
-            object_patch = mpl.patches.Circle(xy=(x, y), radius = self.radius, color = self.color)
-            object_patch.set_zorder(3)
+            if self.shape == 'circle':
 
-        elif self.shape == 'polygon':
-            object_patch = mpl.patches.Polygon(xy=self.vertices.T, color=self.color)
-            object_patch.set_zorder(3)
+                object_patch = mpl.patches.Circle(xy=(x, y), radius = self.radius, color = self.color)
+                object_patch.set_zorder(3)
 
-        ax.add_patch(object_patch)
-        self.plot_patch_list.append(object_patch)
+            elif self.shape == 'polygon':
+                object_patch = mpl.patches.Polygon(xy=self.vertices.T, color=self.color)
+                object_patch.set_zorder(3)
 
+            ax.add_patch(object_patch)
+            self.plot_patch_list.append(object_patch)
+        
+        else:
+            self.plot_object_image(ax, self.description, **kwargs)
+
+
+
+    def plot_object_image(self):
+        pass
+    
 
     def plot_trajectory(self, ax, traj_type='g-', **kwargs):
         
