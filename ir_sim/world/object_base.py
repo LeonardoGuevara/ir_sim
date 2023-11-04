@@ -431,6 +431,8 @@ class ObjectBase:
     
     def plot(self, ax, show_goal=False, show_text=False, show_arrow=False, show_uncertainty=False, show_trajectory=False, show_trail=False, show_sensor=True, trail_freq=1, **kwargs):
 
+        trail_id = kwargs.get('trail_id', self._id)
+
         # object_color = 'g', goal_color='r', show_goal=True, show_text=False, show_traj=False, traj_type='-g', fontsize=10, 
 
         self.plot_object(ax, **kwargs)
@@ -450,7 +452,7 @@ class ObjectBase:
         if show_trajectory:
             self.plot_trajectory(ax, **kwargs)
         
-        if show_trail and world_param.count % trail_freq == 0:
+        if show_trail and world_param.count % trail_freq == 0 and trail_id == self._id:
             self.plot_trail(ax, **kwargs)
 
         if show_sensor:

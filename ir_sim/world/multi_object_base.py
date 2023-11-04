@@ -49,9 +49,12 @@ class MultiObjects:
 
 
         elif distribution_dict['mode'] == 'random':
-            state_list = kwargs['states']
+            range_low = distribution_dict.get('range_low', [0, 0, -np.pi])
+            range_high = distribution_dict.get('range_high', [10, 10, np.pi])
 
-
+            state_array = np.random.uniform(low=range_low, high=range_high, size=(self.number, 3))
+            state_list = state_array.tolist()
+           
         shape_list = kwargs['shapes']
 
 
