@@ -487,13 +487,16 @@ class ObjectBase:
         pass
     
 
-    def plot_trajectory(self, ax, traj_type='g-', **kwargs):
+    def plot_trajectory(self, ax, traj_type='g-', keep_length=0, **kwargs):
         
-        x_list = [t[0, 0] for t in self.trajectory]
-        y_list = [t[1, 0] for t in self.trajectory]
+        # x_list = [t[0, 0] for t in self.trajectory]
+        # y_list = [t[1, 0] for t in self.trajectory]
+
+        x_list = [t[0, 0] for t in self.trajectory[-keep_length:]]
+        y_list = [t[1, 0] for t in self.trajectory[-keep_length:]]
         
         self.plot_line_list.append(ax.plot(x_list, y_list, traj_type))
-         
+        
 
     def plot_goal(self, ax, goal_color='r', **kwargs):
 
