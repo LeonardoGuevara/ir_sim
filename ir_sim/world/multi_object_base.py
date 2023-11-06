@@ -23,8 +23,6 @@ class MultiObjects:
             self.object_list = [ ObjectBase.create_with_shape(dynamics, shape, state=state, behavior=behavior, **kwargs) for state, shape, behavior in zip(self.state_list, self.shape_list, self.behavior_list) ]
 
 
-
-
     def __add__(self, other):
         return self.object_list + other.object_list
 
