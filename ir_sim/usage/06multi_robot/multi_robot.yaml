@@ -10,7 +10,7 @@ robots:
   number: 10
 
   # for multiple robots number>1
-  distribute: {mode: 'circular', shapes: [0.2], circle: [5, 5, 4], random_bear: False, random_shape: False, radius_low: 0.1, radius_high: 1} 
+  distribute: {mode: 'random', shapes: [0.2], circle: [5, 5, 4], random_bear: False, random_shape: False, radius_low: 0.1, radius_high: 1} 
   # distribute: {mode: 'random', rlow: [0, 0, 0], rhigh: [10, 10, 3.14], distance: 1, random_shape: True, radius_low: 0.1, radius_high: 1}
   # distribute: {mode: 'manual', states: [[1, 1, 0], [2, 1, 0]], shapes: [0.2, 0.2], goals: [[7, 7, 0], [7, 2, 0]], random_bear: False}
 
