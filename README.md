@@ -31,6 +31,7 @@ Test platform: Ubuntu20.04, windows10
 
 ```
 pip install ir_sim
+pip install scikit-image
 ```
 
 - or install manually: 
